@@ -12,9 +12,7 @@
     "name": "Giedrius Lukosevicius",
     "url": ""
   },
-  "exclude": [
-    "test",
-  ],
+  "exclude": ["test"],
   "frameworks": "arduino",
   "platforms": "*"
 }
