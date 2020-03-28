@@ -1,0 +1,20 @@
+{
+  "name": "StateMachine",
+  "keywords": "sate machine, workflow, automation, iot",
+  "description": "Library for running state machines on Arduino",
+  "homepage": "",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "version": "1.0.0",
+  "authors": {
+    "name": "Giedrius Lukosevicius",
+    "url": ""
+  },
+  "exclude": [
+    "test",
+  ],
+  "frameworks": "arduino",
+  "platforms": "*"
+}
