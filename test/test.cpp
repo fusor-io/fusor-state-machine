@@ -5,7 +5,7 @@
 #include <float.h>
 #include <limits.h>
 
-#include "../src/smcontroller.cpp"
+#include "../src/StateMachine.cpp"
 
 StaticJsonDocument<1024> _doc;
 char _jsonBuff[1024];

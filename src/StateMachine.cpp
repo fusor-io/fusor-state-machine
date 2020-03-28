@@ -1,13 +1,13 @@
 /*
   State Machine Controller -
   library for running configuration based state machines on Arduino
-  Created by Giedrius Lukosevicius
-  Released into the public domain
+  Copyright Giedrius Lukosevicius 2020
+  MIT License
 */
 
 #include <math.h>
 
-#include "smcontroller.h"
+#include "StateMachine.h"
 
 #include "keycompare/keycompare.h"
 #include "timers/timers.h"

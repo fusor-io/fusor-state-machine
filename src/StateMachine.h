@@ -1,3 +1,10 @@
+/*
+  State Machine Controller -
+  library for running configuration based state machines on Arduino
+  Copyright Giedrius Lukosevicius 2020
+  MIT License
+*/
+
 #ifndef smcontroller_h
 #define smcontroller_h
 

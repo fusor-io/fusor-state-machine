@@ -1,0 +1,36 @@
+#######################################
+# Syntax Coloring Map For State Machine
+#######################################
+ 
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+ 
+StateMachineController  KEYWORD1
+ 
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+ 
+registerAction  KEYWORD2
+setDefinition   KEYWORD2
+init    KEYWORD2
+cycle   KEYWORD2
+ 
+#######################################
+# Constants (LITERAL1)
+#######################################
+DEFINITION_INIT_ACTION  LITERAL1
+DEFINITION_BEFORE_ACTION    LITERAL1
+DEFINITION_AFTER_ACTION LITERAL1
+DEFINITION_STATE_MACHINES   LITERAL1
+DEFINITION_SLEEP_TIMEOUT    LITERAL1
+
+STATE_ENTRY_ACTIONS LITERAL1
+STATE_EXIT_RULES    LITERAL1
+STATE_RULE_IF   LITERAL1
+STATE_RULE_THEN LITERAL1
+
+SM_INITIAL_STATE    LITERAL1
+SM_INITIAL_ACTIONS  LITERAL1
+SM_STATES   LITERAL1
