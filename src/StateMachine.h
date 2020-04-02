@@ -27,6 +27,8 @@
 #define SM_INITIAL_ACTIONS "a"
 #define SM_STATES "s"
 
+class StateMachineController; // forward declaration
+
 #include <map>
 
 #include <ArduinoJson.h>
@@ -36,6 +38,7 @@
 #include "timers/timers.h"
 #include "store/store.h"
 #include "compute/compute.h"
+#include "plugin/plugin.h"
 
 /*
  * Controller definitions should be an DynamicJsonDocument of the following structure:
@@ -120,7 +123,6 @@ typedef struct state_machine_slot
   JsonObject states_definition;
 } STATE_MACHINE_SLOT;
 
-class StateMachineController; // forward declaration
 // callback declarations
 typedef void (*ActionFunction)(StateMachineController *);
 typedef void (*SleepFunction)(unsigned long);
@@ -134,7 +136,8 @@ public:
 
   StateMachineController(const char *, SleepFunction, GetTimeFunction);
   void setActionRunner(ActionFunction);
-  static void registerAction(const char *, ActionFunction);
+  void registerAction(const char *, ActionFunction);
+  void registerPlugin(Plugin *);
   void setDefinition(JsonDocument *);
   void init();
   void cycle();
@@ -147,7 +150,8 @@ public:
   int _stateMachineCount = 0;
   STATE_MACHINE_SLOT _stateMachines[MAX_STATE_MACHINES];
 
-  static std::map<const char *, ActionFunction, KeyCompare> _actionMap;
+  std::map<const char *, ActionFunction, KeyCompare> _actionMap;
+  std::map<const char *, Plugin *, KeyCompare> _pluginMap;
 
   SleepFunction _sleepCallback;
   void _yield();
@@ -155,6 +159,7 @@ public:
 
   void _runAction(JsonVariant);
   void _runActions(JsonVariant);
+  void _runPluginActions(const char *);
   void _runInitAction();
   void _initStateMachines();
   void _runStateMachines();

@@ -3,5 +3,5 @@
 
 bool KeyCompare::operator()(char const *a, char const *b) const
 {
-    return strcmp(a, b) < 0;
+    return strcasecmp(a, b) < 0;
 }

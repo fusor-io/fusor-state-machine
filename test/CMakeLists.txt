@@ -16,8 +16,9 @@ include_directories(../src/keycompare)
 include_directories(../src/timers)
 include_directories(../src/store)
 include_directories(../src/compute)
+include_directories(../src/plugin)
 
 #Link runTests with what we want to test and the GTest and pthread library
-add_executable(executeTests test.cpp ../src/keycompare/keycompare.cpp ../src/timers/timers.cpp ../src/store/store.cpp ../src/compute/compute.cpp)
+add_executable(executeTests test.cpp ../src/keycompare/keycompare.cpp ../src/timers/timers.cpp ../src/store/store.cpp ../src/compute/compute.cpp ../src/plugin/plugin.cpp)
 target_link_libraries(executeTests ${GTEST_LIBRARIES} pthread)
 

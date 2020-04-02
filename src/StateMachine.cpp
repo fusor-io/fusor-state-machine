@@ -13,14 +13,12 @@
 #include "timers/timers.h"
 #include "store/store.h"
 
-std::map<const char *, ActionFunction, KeyCompare> StateMachineController::_actionMap;
-
 /**************************************************************************
  *                         Initialization methods
  **************************************************************************/
 
 StateMachineController::StateMachineController(const char *deviceId, SleepFunction sleepCallback, GetTimeFunction getTime)
-    : timers(getTime), compute(deviceId, &timers)
+    : timers(getTime), compute(deviceId, &timers), _actionMap(), _pluginMap()
 {
   _deviceId = deviceId;
   _sleepCallback = sleepCallback;
@@ -29,6 +27,11 @@ StateMachineController::StateMachineController(const char *deviceId, SleepFuncti
 void StateMachineController::registerAction(const char *name, ActionFunction func)
 {
   _actionMap[name] = func;
+}
+
+void StateMachineController::registerPlugin(Plugin *plugin)
+{
+  _pluginMap[plugin->id] = plugin;
 }
 
 void StateMachineController::setDefinition(JsonDocument *definition)
@@ -100,9 +103,41 @@ void StateMachineController::_runAction(JsonVariant action)
   // check if action is string and it is not empty
   if (action.is<char *>() && ((const char *)action)[0])
   {
-    if (_actionMap.count((const char *)action))
+    const char *actionId = (const char *)action;
+
+    // check if action is one of step machine registered actions
+    if (_actionMap.count(actionId))
     {
-      _actionMap[(const char *)action](this);
+      _actionMap[actionId](this);
+    }
+    // check if action is one of registered plugin actions
+    else
+    {
+      _runPluginActions(actionId);
+    }
+  }
+}
+
+void StateMachineController::_runPluginActions(const char *actionId)
+{
+  char *pluginId, *pluginActionId;
+  char buff[strlen(actionId) + 1];
+  strcpy(buff, actionId);
+  pluginId = strtok(buff, ".");
+  pluginActionId = strtok(NULL, "");
+
+  if (pluginId == nullptr || pluginActionId == nullptr)
+    return;
+
+  // do we have such plugin registerd ?
+  if (_pluginMap.count(pluginId))
+  {
+    Plugin *plugin = _pluginMap[pluginId];
+    // do we have this action in a plugin?
+    if (plugin->actionMap.count(pluginActionId))
+    {
+      // run action
+      plugin->actionMap[pluginActionId](plugin);
     }
   }
 }

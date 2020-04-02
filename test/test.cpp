@@ -360,6 +360,33 @@ TEST(StateMachine, lifeCycle)
   ASSERT_EQ(sm.compute.store.getVarInt("var1"), 77 + 42);
 }
 
+void pluginAction(Plugin *pl)
+{
+  int var = pl->getVarInt("pl_var1");
+  pl->setVar("pl_var1", var + 42);
+}
+
+void pluginAction2(Plugin *pl)
+{
+  int var = pl->getVarInt("pl_var2");
+  pl->setVar("pl_var2", var + 137);
+}
+
+TEST(StateMachine, plugin)
+{
+  StateMachineController sm = StateMachineController("sm", NULL, getTime);
+  Plugin testPlugin("plugin", &sm);
+  testPlugin.registerAction("act1", pluginAction);
+  testPlugin.registerAction("act2", pluginAction2);
+  sm.registerPlugin(&testPlugin);
+
+  JsonVariant actions = makeVariant("[\"plugin.act1\",\"plugin.act2\"]");
+  sm._runActions(actions);
+
+  ASSERT_EQ(sm.compute.store.getVarInt("sm.plugin.pl_var1"), 42);
+  ASSERT_FLOAT_EQ(sm.compute.store.getVarFloat("sm.plugin.pl_var2"), 137.0f);
+}
+
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
