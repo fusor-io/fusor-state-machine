@@ -5,6 +5,10 @@
   MIT License
 */
 
+// Uncomment the following line and recompile library
+// to enable debugg printing
+// #define SM_DEBUGGER
+
 #include <math.h>
 
 #include "StateMachine.h"
@@ -12,6 +16,8 @@
 #include "keycompare/keycompare.h"
 #include "timers/timers.h"
 #include "store/store.h"
+
+#include "StateMachineDebug.h"
 
 /**************************************************************************
  *                         Initialization methods
@@ -36,6 +42,7 @@ void StateMachineController::registerPlugin(Plugin *plugin)
 
 void StateMachineController::setDefinition(JsonDocument *definition)
 {
+  SM_DEBUG("State Machine definition: " << *definition << "\n");
   _definition = definition;
 }
 
@@ -51,6 +58,9 @@ void StateMachineController::init()
 
 void StateMachineController::cycle()
 {
+
+  SM_DEBUG("==============================================================\n");
+  SM_DEBUG("Entering cycle\n");
 
   // Run actions berfore main loop
 
@@ -72,7 +82,7 @@ void StateMachineController::cycle()
 
   // Sleep for time specified in definition, or default 1000ms
 
-  long timeout = 1000;
+  long timeout = 0;
 
   if (_definition->containsKey(DEFINITION_SLEEP_TIMEOUT))
   {
@@ -80,12 +90,24 @@ void StateMachineController::cycle()
   }
 
   if (timeout > 0)
+  {
+    SM_DEBUG("Sleep for " << timeout << "ms\n");
     _sleep((unsigned long)timeout);
+  }
+
+  SM_DEBUG("Exiting cycle\n");
 }
 
 /**************************************************************************
  *                        Private methods
  **************************************************************************/
+
+#ifdef SM_DEBUGGER
+void StateMachineController::setDebugPrinter(DebugPrinter printer)
+{
+  __debugPrinter = printer;
+}
+#endif
 
 void StateMachineController::_yield()
 {
@@ -104,11 +126,13 @@ void StateMachineController::_runAction(JsonVariant action)
   if (action.is<char *>() && ((const char *)action)[0])
   {
     const char *actionId = (const char *)action;
+    SM_DEBUG("Try run action: " << actionId << "\n");
 
     // check if action is one of step machine registered actions
     if (_actionMap.count(actionId))
     {
       _actionMap[actionId](this);
+      SM_DEBUG("Action done: " << actionId << "\n");
     }
     // check if action is one of registered plugin actions
     else
@@ -120,6 +144,8 @@ void StateMachineController::_runAction(JsonVariant action)
 
 void StateMachineController::_runPluginActions(const char *actionId)
 {
+  SM_DEBUG("Try run plugin action: " << actionId << "\n");
+
   char *pluginId, *pluginActionId;
   char buff[strlen(actionId) + 1];
   strcpy(buff, actionId);
@@ -132,12 +158,15 @@ void StateMachineController::_runPluginActions(const char *actionId)
   // do we have such plugin registerd ?
   if (_pluginMap.count(pluginId))
   {
+    SM_DEBUG("Plugin found: " << pluginId << "\n");
+
     Plugin *plugin = _pluginMap[pluginId];
     // do we have this action in a plugin?
     if (plugin->actionMap.count(pluginActionId))
     {
       // run action
       plugin->actionMap[pluginActionId](plugin);
+      SM_DEBUG("Plugin action done: " << pluginActionId << "\n");
     }
   }
 }
@@ -220,6 +249,8 @@ void StateMachineController::_switchState(STATE_MACHINE_SLOT *machineDefinition,
   if (!newState[0])
     return;
 
+  SM_DEBUG("Switch to state: " << newState << "\n");
+
   // set new state
   machineDefinition->state = newState;
 
@@ -238,6 +269,7 @@ void StateMachineController::_runStateMachines()
   {
 
     // take machine
+    SM_DEBUG("Running state machine: " << _stateMachines[i].name << "\n");
 
     const char *state = _stateMachines[i].state;
     JsonObject states_definition = _stateMachines[i].states_definition;
@@ -276,6 +308,8 @@ const char *StateMachineController::_getNextState(JsonArray rules)
 {
   for (JsonVariant item : rules)
   {
+    SM_DEBUG("Checking rule: " << item << "\n");
+
     // validate rule
 
     if (!item.is<JsonObject>() || item.isNull())
@@ -291,13 +325,18 @@ const char *StateMachineController::_getNextState(JsonArray rules)
     // check rule
 
     JsonVariant condition = rule[STATE_RULE_IF];
-    const char *target_state = rule[STATE_RULE_THEN].as<char *>();
+    const char *targetState = rule[STATE_RULE_THEN].as<char *>();
+
+    SM_DEBUG("Evaluate condition: " << condition << "\n");
 
     if (compute.evalCondition(rule[STATE_RULE_IF]))
     {
       // rule satisfied, return next state name
-      return target_state;
+      SM_DEBUG("Rule satisfied, switching to state: " << targetState << "\n");
+      return targetState;
     }
+
+    SM_DEBUG("Rule not satisfied\n");
   }
 
   return nullptr;

@@ -6,6 +6,8 @@
 #include "compute.h"
 #include "../timers/timers.h"
 
+#include "../StateMachineDebug.h"
+
 Compute::Compute(const char *deviceId, Timers *timers)
     : store(deviceId)
 {
@@ -145,6 +147,9 @@ bool Compute::switchCondition(const char *operation, JsonVariant operands)
 
 float Compute::evalMath(JsonVariant object)
 {
+
+    SM_DEBUG("Eval math: " << object << "\n");
+
     if (object.isNull())
         return 0.0;
     if (object.is<bool>())
@@ -156,7 +161,9 @@ float Compute::evalMath(JsonVariant object)
     if (object.is<char *>())
     {
         // if type is string, we should look for variable of that name
-        return ((char *)object.as<char *>())[0] ? evalMath(store.getVar(object)) : 0.0;
+        const char *varName = (char *)object.as<char *>();
+        SM_DEBUG("Operand " << varName << " is a string. Evaluating it as var\n");
+        return varName[0] ? evalMath(store.getVar(varName)) : 0.0;
     }
     if (object.is<JsonArray>())
     {

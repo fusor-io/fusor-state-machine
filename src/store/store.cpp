@@ -2,6 +2,8 @@
 #include <ArduinoJson.h>
 #include "store.h"
 
+#include "../StateMachineDebug.h"
+
 Store::Store(const char *deviceId)
     : _localMemory(MAX_VARIABLE_SPACE)
 {
@@ -17,18 +19,22 @@ void Store::attachGlobalMemory(JsonDocument *memory)
 void Store::setVar(const char *var_name, int value)
 {
     // we can set only local variables. So need to add scope id
+    SM_DEBUG("Set int var [" << var_name << "]: " << value << "\n");
     _localMemory[nameWithScope(var_name)] = value;
 }
 
 void Store::setVar(const char *var_name, float value)
 {
     // we can set only local variables. So need to add scope id
+    SM_DEBUG("Set float var [" << nameWithScope(var_name) << "]: " << value << "\n");
     _localMemory[nameWithScope(var_name)] = value;
 }
 
 int Store::getVarInt(const char *name, int defaultValue)
 {
     JsonVariant value = getVar(name);
+
+    SM_DEBUG("Read var [" << name << "] = " << value << "\n");
 
     if (value.is<int>())
         return value.as<int>();
@@ -42,6 +48,8 @@ int Store::getVarInt(const char *name, int defaultValue)
 float Store::getVarFloat(const char *name, float defaultValue)
 {
     JsonVariant value = getVar(name);
+
+    SM_DEBUG("Read var [" << name << "] = " << value << "\n");
 
     if (value.isNull())
         return defaultValue;
@@ -57,19 +65,30 @@ float Store::getVarFloat(const char *name, float defaultValue)
 
 JsonVariant Store::getVar(const char *var_name)
 {
-
     // first check in local variables
+
+    SM_DEBUG("Get var: " << var_name << "\n");
 
     JsonVariant value = _localMemory[var_name];
     if (!value.isNull())
+    {
+        SM_DEBUG("Get var [" << var_name << "] = " << value << "\n");
         return value;
+    }
+
+    SM_DEBUG("Var " << var_name << " not found\n");
 
     // var_name can be in a local format (no scope identifier)
     // so try adding devideId as a scope
 
     value = _localMemory[nameWithScope(var_name)];
     if (!value.isNull())
+    {
+        SM_DEBUG("Get var [" << nameWithScope(var_name) << "] = " << value << "\n");
         return value;
+    }
+
+    SM_DEBUG("Var " << nameWithScope(var_name) << " not found\n");
 
     // last chance is that it is external variable
     if (_globalMemory)

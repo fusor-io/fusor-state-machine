@@ -5,6 +5,8 @@
 #include <float.h>
 #include <limits.h>
 
+// #define SM_DEBUGGER
+
 #include "../src/StateMachine.cpp"
 
 StaticJsonDocument<1024> _doc;
@@ -20,6 +22,11 @@ JsonVariant makeVariant(const char *json)
   strcat(_jsonBuff, "}");
   deserializeJson(_doc, _jsonBuff);
   return _doc["v"];
+}
+
+void debugPrinter(const char *message)
+{
+  std::cout << message;
 }
 
 TEST(StateMachine, CreateSM)
@@ -321,6 +328,9 @@ TEST(StateMachine, lifeCycle)
   StaticJsonDocument<2048> doc;
   deserializeJson(doc, testSMJson);
   sm.setDefinition(&doc);
+#ifdef SM_DEBUGGER
+  sm.setDebugPrinter(debugPrinter);
+#endif
   sm.registerAction("init_action", sm_init_action);
   sm.registerAction("before_action", sm_before_action);
   sm.registerAction("after_action", sm_after_action);

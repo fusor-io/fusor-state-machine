@@ -5,8 +5,8 @@
   MIT License
 */
 
-#ifndef smcontroller_h
-#define smcontroller_h
+#ifndef statemachine_h
+#define statemachine_h
 
 #define MAX_VAR_NAME_LEN 32     // maximum length of variable name ("device-id.var-name.type")
 #define MAX_VARIABLE_SPACE 1024 // maximum size of JSON storing local variables
@@ -39,6 +39,8 @@ class StateMachineController; // forward declaration
 #include "store/store.h"
 #include "compute/compute.h"
 #include "plugin/plugin.h"
+
+#include "StateMachineDebug.h"
 
 /*
  * Controller definitions should be an DynamicJsonDocument of the following structure:
@@ -141,6 +143,10 @@ public:
   void setDefinition(JsonDocument *);
   void init();
   void cycle();
+
+#ifdef SM_DEBUGGER
+  void setDebugPrinter(DebugPrinter);
+#endif
 
   // private:
   const char *_deviceId;
