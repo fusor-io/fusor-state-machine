@@ -1,11 +1,11 @@
 #include <math.h>
 #include <ArduinoJson.h>
-#include "store.h"
 
+#include "store.h"
 #include "../StateMachineDebug.h"
 
 Store::Store(const char *deviceId)
-    : _localMemory(MAX_VARIABLE_SPACE)
+    : _localMemory()
 {
     _deviceId = deviceId;
     _globalMemory = nullptr;
@@ -16,85 +16,100 @@ void Store::attachGlobalMemory(JsonDocument *memory)
     _globalMemory = memory;
 }
 
-void Store::setVar(const char *var_name, int value)
+void Store::setVar(const char *varName, long int value)
 {
+    char *varNameWithScope = nameWithScope(varName);
+
     // we can set only local variables. So need to add scope id
-    SM_DEBUG("Set int var [" << var_name << "]: " << value << "\n");
-    _localMemory[nameWithScope(var_name)] = value;
+    SM_DEBUG("Set int var [" << varNameWithScope << "]: " << value << "\n");
+    if (_localMemory.count(varNameWithScope))
+    {
+        VarStruct *var = _localMemory[varNameWithScope];
+        var->type = VAR_TYPE_LONG;
+        var->vInt = value;
+        var->vFloat = (float)value;
+    }
+    else
+    {
+        _localMemory[_createKey(varNameWithScope)] = new VarStruct(value);
+    }
 }
 
-void Store::setVar(const char *var_name, float value)
+void Store::setVar(const char *var_name, int value)
 {
+    setVar(var_name, (long int)value);
+}
+
+void Store::setVar(const char *varName, float value)
+{
+    char *varNameWithScope = nameWithScope(varName);
+
     // we can set only local variables. So need to add scope id
-    SM_DEBUG("Set float var [" << nameWithScope(var_name) << "]: " << value << "\n");
-    _localMemory[nameWithScope(var_name)] = value;
+    SM_DEBUG("Set float var [" << varNameWithScope << "]: " << value << "\n");
+    if (_localMemory.count(varNameWithScope) > 0)
+    {
+        VarStruct *var = _localMemory[varNameWithScope];
+        var->type = VAR_TYPE_FLOAT;
+        var->vInt = round(value);
+        var->vFloat = value;
+    }
+    else
+    {
+        _localMemory[_createKey(varNameWithScope)] = new VarStruct(value);
+    }
 }
 
 int Store::getVarInt(const char *name, int defaultValue)
 {
-    JsonVariant value = getVar(name);
+    VarStruct *value = getVar(name);
 
-    SM_DEBUG("Read var [" << name << "] = " << value << "\n");
+    if (value == nullptr)
+        return defaultValue;
 
-    if (value.is<int>())
-        return value.as<int>();
-
-    if (value.is<float>())
-        return round(value.as<float>());
-
-    return defaultValue;
+    return value->vInt;
 }
 
 float Store::getVarFloat(const char *name, float defaultValue)
 {
-    JsonVariant value = getVar(name);
+    VarStruct *value = getVar(name);
 
-    SM_DEBUG("Read var [" << name << "] = " << value << "\n");
-
-    if (value.isNull())
+    if (value == nullptr)
         return defaultValue;
 
-    if (value.is<float>())
-        return value.as<float>();
-
-    if (value.is<int>())
-        return (float)value.as<int>();
-
-    return defaultValue;
+    return value->vFloat;
 }
 
-JsonVariant Store::getVar(const char *var_name)
+VarStruct *Store::getVar(const char *varName)
 {
     // first check in local variables
 
-    SM_DEBUG("Get var: " << var_name << "\n");
+    SM_DEBUG("Get var: " << varName << "\n");
 
-    JsonVariant value = _localMemory[var_name];
-    if (!value.isNull())
+    if (_localMemory.count((char *)varName) > 0)
     {
-        SM_DEBUG("Get var [" << var_name << "] = " << value << "\n");
-        return value;
+        SM_DEBUG("Get var [" << varName << "] = " << _localMemory[(char *)varName]->vFloat << "\n");
+        return _localMemory[(char *)varName];
     }
 
-    SM_DEBUG("Var " << var_name << " not found\n");
+    SM_DEBUG("Var " << varName << " not found\n");
 
     // var_name can be in a local format (no scope identifier)
     // so try adding devideId as a scope
 
-    value = _localMemory[nameWithScope(var_name)];
-    if (!value.isNull())
+    char *varNameWithScope = nameWithScope(varName);
+    if (_localMemory.count(varNameWithScope) > 0)
     {
-        SM_DEBUG("Get var [" << nameWithScope(var_name) << "] = " << value << "\n");
-        return value;
+        SM_DEBUG("Get var [" << varNameWithScope << "] = " << _localMemory[varNameWithScope]->vFloat << "\n");
+        return _localMemory[varNameWithScope];
     }
 
-    SM_DEBUG("Var " << nameWithScope(var_name) << " not found\n");
+    SM_DEBUG("Var " << varNameWithScope << " not found\n");
 
     // last chance is that it is external variable
-    if (_globalMemory)
-        return (*_globalMemory)[var_name];
+    // if (_globalMemory)
+    //     return (*_globalMemory)[varName];
 
-    return value;
+    return nullptr;
 }
 
 char *Store::nameWithScope(const char *var_name)
@@ -103,4 +118,11 @@ char *Store::nameWithScope(const char *var_name)
     strncat(_varNameBuffer, ".", MAX_VAR_NAME_LEN - strlen(_varNameBuffer) - 1);
     strncat(_varNameBuffer, var_name, MAX_VAR_NAME_LEN - strlen(_varNameBuffer) - 1);
     return _varNameBuffer;
+}
+
+char *Store::_createKey(const char *key)
+{
+    char *buff = new char[strlen(key) + 1];
+    strcpy(buff, key);
+    return buff;
 }

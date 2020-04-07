@@ -29,7 +29,7 @@ bool Compute::evalCondition(JsonVariant condition)
         return condition.as<float>() != 0.0;
     if (condition.is<char *>())
     {
-        return ((char *)condition.as<char *>())[0] ? evalCondition(store.getVar(condition)) : false;
+        return ((char *)condition.as<char *>())[0] ? store.getVarInt(condition) : false;
     }
     if (!condition.is<JsonObject>())
         return false;
@@ -163,7 +163,7 @@ float Compute::evalMath(JsonVariant object)
         // if type is string, we should look for variable of that name
         const char *varName = (char *)object.as<char *>();
         SM_DEBUG("Operand " << varName << " is a string. Evaluating it as var\n");
-        return varName[0] ? evalMath(store.getVar(varName)) : 0.0;
+        return varName[0] ? store.getVarFloat(varName) : 0.0;
     }
     if (object.is<JsonArray>())
     {

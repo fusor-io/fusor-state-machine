@@ -44,9 +44,10 @@ TEST(StateMachine, setVar_getVarInt)
 {
   StateMachineController sm = StateMachineController("sm", NULL, getTime);
   sm.compute.store.setVar("test", 42);
+  sm.compute.store.setVar("test0", 42);
+  sm.compute.store.setVar("test1", 137.1f);
   ASSERT_EQ(sm.compute.store.getVarInt("test"), 42);
-  sm.compute.store.setVar("test1", 42.1f);
-  ASSERT_EQ(sm.compute.store.getVarInt("test1"), 42);
+  ASSERT_EQ(sm.compute.store.getVarInt("test1"), 137);
   ASSERT_EQ(sm.compute.store.getVarInt("test2"), 0);
   ASSERT_EQ(sm.compute.store.getVarInt("test2", 7), 7);
 }
