@@ -25,6 +25,7 @@
 
 #define SM_INITIAL_STATE "i"
 #define SM_INITIAL_ACTIONS "a"
+#define SM_BEFORE_CYCLE_ACTIONS "b"
 #define SM_STATES "s"
 
 class StateMachineController; // forward declaration
@@ -104,16 +105,16 @@ class StateMachineController; // forward declaration
  *   ]
  * }
  *  
- * Variables are DynamicJsonDocument of the following structure:
+ * Variables are of the following structure:
  * { 
- *   "[scope.]var-name.type": <value>   // scope is deviceId (none for local), supported types - f = float, i = int 
+ *   "[scope.][plugin.]var-name": <value>
  * }
  * 
  * Example:
  * {
- *   "ctrl.max-duration": 3600, // external
- *   "weather.temp": 25.5,      // external
- *   "humidity": 40             // internal
+ *   "ctrl.max-duration": 3600,    // external
+ *   "weather.bme280.temp": 25.5,  // from plugin
+ *   "humidity": 40                // internal
  * }
  */
 

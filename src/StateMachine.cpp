@@ -269,8 +269,11 @@ void StateMachineController::_runStateMachines()
   for (int i = 0; i < _stateMachineCount; i++)
   {
 
-    // take machine
     SM_DEBUG("Running state machine: " << _stateMachines[i].name << "\n");
+
+    // run initial actions for each cycle
+
+    _runActions(_stateMachines[i].machine[SM_BEFORE_CYCLE_ACTIONS]);
 
     const char *state = _stateMachines[i].state;
     JsonObject states_definition = _stateMachines[i].states_definition;

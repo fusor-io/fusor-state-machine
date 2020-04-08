@@ -287,6 +287,10 @@ void sm1_action2(StateMachineController *smc)
   smc->compute.store.setVar("var1", v + 42);
 }
 void sm1_action3(StateMachineController *smc) { smc->compute.store.setVar("var1", 77); }
+void sm1_action4(StateMachineController *smc)
+{
+  smc->compute.store.setVar("each_cycle", 137);
+}
 
 TEST(StateMachine, lifeCycle)
 {
@@ -299,6 +303,7 @@ TEST(StateMachine, lifeCycle)
     \"sm1\": {\
       \"i\": \"sm1_state1\",\
       \"a\": [\"sm1_action1\"],\
+      \"b\": [\"sm1_action4\"],\
       \"s\": {\
         \"sm1_state1\": {\
 	        \"a\": [\"sm1_action2\"],\
@@ -338,6 +343,7 @@ TEST(StateMachine, lifeCycle)
   sm.registerAction("sm1_action1", sm1_action1);
   sm.registerAction("sm1_action2", sm1_action2);
   sm.registerAction("sm1_action3", sm1_action3);
+  sm.registerAction("sm1_action4", sm1_action4);
   sm.init();
 
   // check if controller init action was called
@@ -360,6 +366,7 @@ TEST(StateMachine, lifeCycle)
   sm.cycle();
   ASSERT_EQ(sm.compute.store.getVarInt("before"), 1);
   ASSERT_EQ(sm.compute.store.getVarInt("after"), 1);
+  ASSERT_EQ(sm.compute.store.getVarInt("each_cycle"), 137);
 
   // check if machine is changed its state
   ASSERT_STREQ(sm._stateMachines[0].state, "sm1_state2");
@@ -385,7 +392,6 @@ void pluginAction2(Plugin *pl)
 
 TEST(StateMachine, plugin)
 {
-  __debugPrinter = debugPrinter;
   StateMachineController sm = StateMachineController("sm", NULL, getTime);
   Plugin testPlugin("plugin", &sm);
   testPlugin.registerAction("act1", pluginAction);
