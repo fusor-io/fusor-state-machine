@@ -5,8 +5,8 @@
 #include "math.h"
 #include <ArduinoJson.h>
 #include "../keycompare/keycompare.h"
+#include "../keycreate/keycreate.h"
 
-#define MAX_VAR_NAME_LEN 32     // maximum length of variable name ("device-id.var-name.type")
 #define MAX_VARIABLE_SPACE 1024 // maximum size of JSON storing local variables
 
 #define VAR_TYPE_FLOAT 0
@@ -38,15 +38,13 @@ public:
     float getVarFloat(const char *, float defaultValue = 0.0f);
     VarStruct *getVar(const char *);
 
-    char *nameWithScope(const char *);
-
 private:
     std::map<char *, VarStruct *, KeyCompare> _localMemory; // local device variables
     JsonDocument *_globalMemory;                            // global variables populated from server
 
     const char *_deviceId;
-    char _varNameBuffer[MAX_VAR_NAME_LEN];
-    char *_createKey(const char *);
+    KeyCreate _keyCreator;
+    char *_withScope(const char *);
 };
 
 #endif

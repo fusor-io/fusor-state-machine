@@ -14,6 +14,7 @@
 #include "StateMachine.h"
 
 #include "keycompare/keycompare.h"
+#include "keycreate/keycreate.h"
 #include "timers/timers.h"
 #include "store/store.h"
 

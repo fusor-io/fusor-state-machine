@@ -36,8 +36,8 @@ TEST(StateMachine, CreateSM)
 
 TEST(StateMachine, NameWithScope)
 {
-  StateMachineController sm = StateMachineController("sm", NULL, getTime);
-  ASSERT_STREQ(sm.compute.store.nameWithScope("test"), "sm.test");
+  KeyCreate keyCreator;
+  ASSERT_STREQ(keyCreator.withScope("testid", "testname"), "testid.testname");
 }
 
 TEST(StateMachine, setVar_getVarInt)
@@ -385,6 +385,7 @@ void pluginAction2(Plugin *pl)
 
 TEST(StateMachine, plugin)
 {
+  __debugPrinter = debugPrinter;
   StateMachineController sm = StateMachineController("sm", NULL, getTime);
   Plugin testPlugin("plugin", &sm);
   testPlugin.registerAction("act1", pluginAction);

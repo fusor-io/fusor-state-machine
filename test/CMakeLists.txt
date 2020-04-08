@@ -13,6 +13,7 @@ message(STATUS "GTest: ${GTEST_INCLUDE_DIRS} ${GTEST_LIBRARIES}")
 include_directories(${GTEST_INCLUDE_DIRS})
 include_directories(${ARDUINO_LIB_ROOT}/ArduinoJson/src)
 include_directories(../src/keycompare)
+include_directories(../src/keycreate)
 include_directories(../src/timers)
 include_directories(../src/store)
 include_directories(../src/compute)
@@ -22,6 +23,7 @@ include_directories(../src/plugin)
 add_executable(executeTests 
     test.cpp
     ../src/keycompare/keycompare.cpp
+    ../src/keycreate/keycreate.cpp
     ../src/timers/timers.cpp
     ../src/store/store.cpp
     ../src/compute/compute.cpp

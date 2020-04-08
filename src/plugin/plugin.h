@@ -22,11 +22,13 @@ public:
     void setVar(const char *, float);
     int getVarInt(const char *, int defaultValue = 0);
     float getVarFloat(const char *, float defaultValue = 0.0f);
+    VarStruct *getVarRaw(const char *);
 
     std::map<const char *, PluginFunction, KeyCompare> actionMap;
 
-private:
-    char *withNameSpace(const char *);
+protected:
+    KeyCreate _keyCreator;
+    char *_withScope(const char *);
 };
 
 #endif

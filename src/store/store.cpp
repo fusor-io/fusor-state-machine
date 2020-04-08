@@ -3,9 +3,10 @@
 
 #include "store.h"
 #include "../StateMachineDebug.h"
+#include "../keycreate/keycreate.h"
 
 Store::Store(const char *deviceId)
-    : _localMemory()
+    : _localMemory(), _keyCreator()
 {
     _deviceId = deviceId;
     _globalMemory = nullptr;
@@ -18,7 +19,7 @@ void Store::attachGlobalMemory(JsonDocument *memory)
 
 void Store::setVar(const char *varName, long int value)
 {
-    char *varNameWithScope = nameWithScope(varName);
+    char *varNameWithScope = _withScope(varName);
 
     // we can set only local variables. So need to add scope id
     SM_DEBUG("Set int var [" << varNameWithScope << "]: " << value << "\n");
@@ -31,7 +32,7 @@ void Store::setVar(const char *varName, long int value)
     }
     else
     {
-        _localMemory[_createKey(varNameWithScope)] = new VarStruct(value);
+        _localMemory[(char *)_keyCreator.createKey(varNameWithScope)] = new VarStruct(value);
     }
 }
 
@@ -42,8 +43,7 @@ void Store::setVar(const char *var_name, int value)
 
 void Store::setVar(const char *varName, float value)
 {
-    char *varNameWithScope = nameWithScope(varName);
-
+    char *varNameWithScope = _withScope(varName);
     // we can set only local variables. So need to add scope id
     SM_DEBUG("Set float var [" << varNameWithScope << "]: " << value << "\n");
     if (_localMemory.count(varNameWithScope) > 0)
@@ -55,7 +55,7 @@ void Store::setVar(const char *varName, float value)
     }
     else
     {
-        _localMemory[_createKey(varNameWithScope)] = new VarStruct(value);
+        _localMemory[(char *)_keyCreator.createKey(varNameWithScope)] = new VarStruct(value);
     }
 }
 
@@ -96,7 +96,7 @@ VarStruct *Store::getVar(const char *varName)
     // var_name can be in a local format (no scope identifier)
     // so try adding devideId as a scope
 
-    char *varNameWithScope = nameWithScope(varName);
+    char *varNameWithScope = _withScope(varName);
     if (_localMemory.count(varNameWithScope) > 0)
     {
         SM_DEBUG("Get var [" << varNameWithScope << "] = " << _localMemory[varNameWithScope]->vFloat << "\n");
@@ -112,17 +112,7 @@ VarStruct *Store::getVar(const char *varName)
     return nullptr;
 }
 
-char *Store::nameWithScope(const char *var_name)
+char *Store::_withScope(const char *var_name)
 {
-    strncpy(_varNameBuffer, _deviceId, MAX_VAR_NAME_LEN - 1);
-    strncat(_varNameBuffer, ".", MAX_VAR_NAME_LEN - strlen(_varNameBuffer) - 1);
-    strncat(_varNameBuffer, var_name, MAX_VAR_NAME_LEN - strlen(_varNameBuffer) - 1);
-    return _varNameBuffer;
-}
-
-char *Store::_createKey(const char *key)
-{
-    char *buff = new char[strlen(key) + 1];
-    strcpy(buff, key);
-    return buff;
+    return _keyCreator.withScope(_deviceId, var_name);
 }
