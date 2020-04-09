@@ -39,6 +39,7 @@ void StateMachineController::registerAction(const char *name, ActionFunction fun
 void StateMachineController::registerPlugin(Plugin *plugin)
 {
   _pluginMap[plugin->id] = plugin;
+  plugin->initialize(this);
 }
 
 void StateMachineController::setDefinition(JsonDocument *definition)

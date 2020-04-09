@@ -393,7 +393,7 @@ void pluginAction2(Plugin *pl)
 TEST(StateMachine, plugin)
 {
   StateMachineController sm = StateMachineController("sm", NULL, getTime);
-  Plugin testPlugin("plugin", &sm);
+  Plugin testPlugin("plugin");
   testPlugin.registerAction("act1", pluginAction);
   testPlugin.registerAction("act2", pluginAction2);
   sm.registerPlugin(&testPlugin);

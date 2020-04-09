@@ -12,11 +12,12 @@ typedef void (*PluginFunction)(Plugin *);
 class Plugin
 {
 public:
-    Plugin(const char *, StateMachineController *);
+    Plugin(const char *);
 
     StateMachineController *sm;
     const char *id;
 
+    void initialize(StateMachineController *);
     void registerAction(const char *, PluginFunction);
     void setVar(const char *, int);
     void setVar(const char *, float);

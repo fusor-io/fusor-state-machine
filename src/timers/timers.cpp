@@ -28,7 +28,7 @@ unsigned long Timers::getTime()
  */
 bool Timers::validateTimer(const char *timerName, unsigned long timeout)
 {
-    if (!_getTimeCallback || timeout == 0)
+    if (!_getTimeCallback)
         return true;
 
     // check if timer is already registered

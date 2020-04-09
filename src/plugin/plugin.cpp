@@ -4,9 +4,13 @@
 #include "../keycreate/keycreate.h"
 #include "plugin.h"
 
-Plugin::Plugin(const char *id, StateMachineController *sm) : actionMap(), _keyCreator()
+Plugin::Plugin(const char *id) : actionMap(), _keyCreator()
 {
     this->id = id;
+}
+
+void Plugin::initialize(StateMachineController *sm)
+{
     this->sm = sm;
 }
 
