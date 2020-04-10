@@ -77,6 +77,12 @@ public:
         __debugPrinter(buff);
         return *this;
     }
+    inline Trace &operator<<(const JsonArray &doc)
+    {
+        serializeJson(doc, buff, DEBUG_BUFFER_SIZE - 1);
+        __debugPrinter(buff);
+        return *this;
+    }
     inline Trace &operator<<(Trace &(*function)(Trace &trace))
     {
         return function(*this);

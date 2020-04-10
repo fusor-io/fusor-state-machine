@@ -41,7 +41,7 @@ float Plugin::getVarFloat(const char *name, float defaultValue)
 
 VarStruct *Plugin::getVarRaw(const char *name)
 {
-    return sm->compute.store.getVar(name);
+    return sm->compute.store.getVar(_withScope(name));
 }
 
 char *Plugin::_withScope(const char *varName)
