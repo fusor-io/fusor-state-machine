@@ -34,7 +34,7 @@ public:
     void setVar(const char *, int);
     void setVar(const char *, float);
 
-    int getVarInt(const char *, int defaultValue = 0);
+    long int getVarInt(const char *, int defaultValue = 0);
     float getVarFloat(const char *, float defaultValue = 0.0f);
     VarStruct *getVar(const char *);
 

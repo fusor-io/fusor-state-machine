@@ -17,6 +17,7 @@
 #include "keycreate/keycreate.h"
 #include "timers/timers.h"
 #include "store/store.h"
+#include "actioncontext/actioncontext.h"
 
 #include "StateMachineDebug.h"
 
@@ -25,7 +26,7 @@
  **************************************************************************/
 
 StateMachineController::StateMachineController(const char *deviceId, SleepFunction sleepCallback, GetTimeFunction getTime)
-    : timers(getTime), compute(deviceId, &timers), _actionMap(), _pluginMap()
+    : timers(getTime), compute(deviceId, &timers), _actionMap(), _pluginMap(), _actionContext(&compute)
 {
   _deviceId = deviceId;
   _sleepCallback = sleepCallback;
@@ -127,20 +128,47 @@ void StateMachineController::_runAction(JsonVariant action)
   // check if action is string and it is not empty
   if (action.is<char *>() && ((const char *)action)[0])
   {
-    const char *actionId = (const char *)action;
-    SM_DEBUG("Try run action: " << actionId << "\n");
+    SM_DEBUG("Try run action: " << (const char *)action << "\n");
+    _runAction((const char *)action);
+  }
+  else if (action.is<JsonObject>())
+  {
+    _runActionWithParams(action.as<JsonObject>());
+  }
+}
 
-    // check if action is one of step machine registered actions
-    if (_actionMap.count(actionId))
-    {
-      _actionMap[actionId](this);
-      SM_DEBUG("Action done: " << actionId << "\n");
-    }
-    // check if action is one of registered plugin actions
-    else
-    {
-      _runPluginActions(actionId);
-    }
+void StateMachineController::_runAction(const char *actionId)
+{
+  // check if action is one of step machine registered actions
+  if (_actionMap.count(actionId))
+  {
+    _actionMap[actionId](&_actionContext);
+    SM_DEBUG("Action done: " << actionId << "\n");
+  }
+  // check if action is one of registered plugin actions
+  else
+  {
+    _runPluginActions(actionId);
+  }
+}
+
+void StateMachineController::_runActionWithParams(JsonObject actions)
+{
+  if (actions.isNull())
+    return;
+
+  for (JsonPair action : actions)
+  {
+    const char *actionId = action.key().c_str();
+
+    JsonVariant item = action.value();
+    if (!item.is<JsonArray>())
+      continue;
+    JsonArray params = item.as<JsonArray>();
+
+    _actionContext.setParams(&params);
+    _runAction(actionId);
+    _actionContext.resetParams();
   }
 }
 

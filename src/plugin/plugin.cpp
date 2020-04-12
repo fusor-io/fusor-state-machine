@@ -12,6 +12,7 @@ Plugin::Plugin(const char *id) : actionMap(), _keyCreator()
 void Plugin::initialize(StateMachineController *sm)
 {
     this->sm = sm;
+    actionContext = &(sm->_actionContext);
 }
 
 void Plugin::registerAction(const char *name, PluginFunction action)

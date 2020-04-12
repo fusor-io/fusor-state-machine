@@ -40,6 +40,7 @@ class StateMachineController; // forward declaration
 #include "store/store.h"
 #include "compute/compute.h"
 #include "plugin/plugin.h"
+#include "actioncontext/actioncontext.h"
 
 #include "StateMachineDebug.h"
 
@@ -116,6 +117,13 @@ class StateMachineController; // forward declaration
  *   "weather.bme280.temp": 25.5,  // from plugin
  *   "humidity": 40                // internal
  * }
+ * 
+ * Actions can be 
+ *   - simple, represented by name (text string), ex. "my-action"
+ *   - with params, represented by JsonObject, ex.
+ *     {
+ *       "my-action": [123, "my-var-1", {"sqrt":"my-var-2"}]
+ *     } 
  */
 
 typedef struct state_machine_slot
@@ -127,7 +135,7 @@ typedef struct state_machine_slot
 } STATE_MACHINE_SLOT;
 
 // callback declarations
-typedef void (*ActionFunction)(StateMachineController *);
+typedef void (*ActionFunction)(ActionContext *);
 typedef void (*SleepFunction)(unsigned long);
 typedef unsigned long (*GetTimeFunction)(void);
 
@@ -165,13 +173,17 @@ public:
   void _sleep(unsigned long);
 
   void _runAction(JsonVariant);
+  void _runAction(const char *);
   void _runActions(JsonVariant);
+  void _runActionWithParams(JsonObject);
   void _runPluginActions(const char *);
   void _runInitAction();
   void _initStateMachines();
   void _runStateMachines();
   void _switchState(STATE_MACHINE_SLOT *, const char *);
   const char *_getNextState(JsonArray);
+
+  ActionContext _actionContext;
 };
 
 #endif

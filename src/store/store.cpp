@@ -59,7 +59,7 @@ void Store::setVar(const char *varName, float value)
     }
 }
 
-int Store::getVarInt(const char *name, int defaultValue)
+long int Store::getVarInt(const char *name, int defaultValue)
 {
     VarStruct *value = getVar(name);
 

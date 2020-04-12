@@ -61,9 +61,10 @@ TEST(StateMachine, setVar_getVarFloat)
   ASSERT_EQ(sm.compute.store.getVarFloat("test2"), 42.0f);
 }
 
-int foo1 = 0, foo2 = 0;
-void dummy_action1(StateMachineController *smc) { foo1 = 42; }
-void dummy_action2(StateMachineController *smc) { foo2 = 136; }
+long int foo1 = 0, foo2 = 0, foo3 = 0;
+void dummy_action1(ActionContext *ctx) { foo1 = 42; }
+void dummy_action2(ActionContext *ctx) { foo2 = 136; }
+void dummy_action3(ActionContext *ctx) { foo3 = ctx->getParamInt(0); }
 
 TEST(StateMachine, registerAction_runAction)
 {
@@ -82,6 +83,26 @@ TEST(StateMachine, registerAction_runAction)
   foo1 = 0;
   sm._runAction(action2);
   ASSERT_EQ(foo1, 0);
+}
+
+TEST(StateMachine, registerAction_runActionWitParams)
+{
+  StateMachineController sm = StateMachineController("sm", NULL, getTime);
+  sm.registerAction("action3", &dummy_action3);
+
+  JsonVariant action3 = makeVariant("{\"action3\":[{ \"sum\": [\"var1\",1]}]}");
+  sm.compute.store.setVar("var1", 136);
+
+  foo3 = 0;
+  sm._runAction(action3);
+  ASSERT_EQ(foo3, 137);
+
+  // test non existent action
+  JsonVariant action2 = makeVariant("{\"action2\":[137]}");
+
+  foo2 = 0;
+  sm._runAction(action2);
+  ASSERT_EQ(foo2, 0);
 }
 
 TEST(StateMachine, runActions)
@@ -277,19 +298,19 @@ TEST(StateMachine, evalCondition_elapsed)
   ASSERT_TRUE(sm.compute.evalCondition(cond2));
 }
 
-void sm_init_action(StateMachineController *smc) { smc->compute.store.setVar("init", 1); }
-void sm_before_action(StateMachineController *smc) { smc->compute.store.setVar("before", 1); }
-void sm_after_action(StateMachineController *smc) { smc->compute.store.setVar("after", 1); }
-void sm1_action1(StateMachineController *smc) { smc->compute.store.setVar("var1", 1); }
-void sm1_action2(StateMachineController *smc)
+void sm_init_action(ActionContext *ctx) { ctx->compute->store.setVar("init", 1); }
+void sm_before_action(ActionContext *ctx) { ctx->compute->store.setVar("before", 1); }
+void sm_after_action(ActionContext *ctx) { ctx->compute->store.setVar("after", 1); }
+void sm1_action1(ActionContext *ctx) { ctx->compute->store.setVar("var1", 1); }
+void sm1_action2(ActionContext *ctx)
 {
-  int v = smc->compute.store.getVarInt("var1");
-  smc->compute.store.setVar("var1", v + 42);
+  int v = ctx->compute->store.getVarInt("var1");
+  ctx->compute->store.setVar("var1", v + 42);
 }
-void sm1_action3(StateMachineController *smc) { smc->compute.store.setVar("var1", 77); }
-void sm1_action4(StateMachineController *smc)
+void sm1_action3(ActionContext *ctx) { ctx->compute->store.setVar("var1", 77); }
+void sm1_action4(ActionContext *ctx)
 {
-  smc->compute.store.setVar("each_cycle", 137);
+  ctx->compute->store.setVar("each_cycle", 137);
 }
 
 TEST(StateMachine, lifeCycle)

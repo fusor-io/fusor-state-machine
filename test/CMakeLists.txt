@@ -17,6 +17,7 @@ include_directories(../src/keycreate)
 include_directories(../src/timers)
 include_directories(../src/store)
 include_directories(../src/compute)
+include_directories(../src/actioncontext)
 include_directories(../src/plugin)
 
 #Link runTests with what we want to test and the GTest and pthread library
@@ -27,6 +28,7 @@ add_executable(executeTests
     ../src/timers/timers.cpp
     ../src/store/store.cpp
     ../src/compute/compute.cpp
+    ../src/actioncontext/actioncontext.cpp
     ../src/plugin/plugin.cpp
     ../src/StateMachineDebug.cpp
 )

@@ -5,6 +5,7 @@
 
 #include "../StateMachine.h"
 #include "../keycompare/keycompare.h"
+#include "../actioncontext/actioncontext.h"
 
 class Plugin;
 typedef void (*PluginFunction)(Plugin *);
@@ -17,7 +18,7 @@ public:
     StateMachineController *sm;
     const char *id;
 
-    void initialize(StateMachineController *);
+    virtual void initialize(StateMachineController *);
     void registerAction(const char *, PluginFunction);
     void setVar(const char *, int);
     void setVar(const char *, float);
@@ -26,6 +27,8 @@ public:
     VarStruct *getVarRaw(const char *);
 
     std::map<const char *, PluginFunction, KeyCompare> actionMap;
+
+    ActionContext *actionContext;
 
 protected:
     KeyCreate _keyCreator;
