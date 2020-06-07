@@ -78,6 +78,8 @@ void StateMachineController::cycle()
 
   // Run actions after main loop
 
+  SM_DEBUG("Checking post loop actions\n");
+
   if (_definition->containsKey(DEFINITION_AFTER_ACTION))
   {
     _runActions((*_definition)[DEFINITION_AFTER_ACTION]);
@@ -86,6 +88,8 @@ void StateMachineController::cycle()
   // Sleep for time specified in definition, or default 1000ms
 
   long timeout = 0;
+
+  SM_DEBUG("Reading sleep config\n");
 
   if (_definition->containsKey(DEFINITION_SLEEP_TIMEOUT))
   {
