@@ -55,6 +55,11 @@ void StateMachineController::init()
   _initStateMachines();
 }
 
+void StateMachineController::setHooks(Hooks *hooks)
+{
+  compute.setHooks(hooks);
+}
+
 /**************************************************************************
  *                             Main cycle
  **************************************************************************/

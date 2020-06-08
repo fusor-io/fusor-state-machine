@@ -65,6 +65,6 @@ bool Timers::validateTimer(const char *timerName, unsigned long timeout)
 unsigned long Timers::elapsed(unsigned long start, unsigned long end)
 {
     // we should handle time overflow condition
-    // if end < start it means we had onverflow
+    // if end < start it means we had overflow
     return end >= start ? end - start : ULONG_MAX - start + 1 + end;
 }

@@ -14,6 +14,11 @@ Compute::Compute(const char *deviceId, Timers *timers)
     _timers = timers;
 }
 
+void Compute::setHooks(Hooks *hooks)
+{
+    store.setHooks(hooks);
+}
+
 bool Compute::evalCondition(JsonVariant condition)
 {
 

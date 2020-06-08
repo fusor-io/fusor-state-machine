@@ -6,28 +6,16 @@
 #include <ArduinoJson.h>
 #include "../keycompare/keycompare.h"
 #include "../keycreate/keycreate.h"
+#include "../hooks/hooks.h"
+#include "./varStruct.h"
 
 #define MAX_VARIABLE_SPACE 1024 // maximum size of JSON storing local variables
-
-#define VAR_TYPE_FLOAT 0
-#define VAR_TYPE_LONG 1
-
-typedef struct VarStruct
-{
-    VarStruct(long int _value)
-        : type(VAR_TYPE_LONG), vFloat((float)_value), vInt(_value) {}
-    VarStruct(float _value)
-        : type(VAR_TYPE_LONG), vFloat(_value), vInt(round(_value)) {}
-
-    char type;
-    volatile long int vInt;
-    volatile float vFloat;
-} VarStruct;
 
 class Store
 {
 public:
     Store(const char *);
+    void setHooks(Hooks *);
     void attachGlobalMemory(JsonDocument *);
 
     void setVar(const char *, long int);
@@ -42,6 +30,7 @@ private:
     std::map<char *, VarStruct *, KeyCompare> _localMemory; // local device variables
     JsonDocument *_globalMemory;                            // global variables populated from server
 
+    Hooks *_hooks = nullptr;
     const char *_deviceId;
     KeyCreate _keyCreator;
     char *_withScope(const char *);

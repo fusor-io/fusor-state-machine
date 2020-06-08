@@ -22,7 +22,7 @@ Tests are currently supported only on `Ubuntu`. It may run on other Linux versio
 4. Build and run:
 
 ```
-   cmake CMakeList.txt
+   cmake CMakeLists.txt
    make
    ./executeTests
 ```

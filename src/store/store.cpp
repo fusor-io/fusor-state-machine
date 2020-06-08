@@ -12,6 +12,11 @@ Store::Store(const char *deviceId)
     _globalMemory = nullptr;
 }
 
+void Store::setHooks(Hooks *hooks)
+{
+    _hooks = hooks;
+}
+
 void Store::attachGlobalMemory(JsonDocument *memory)
 {
     _globalMemory = memory;
@@ -20,19 +25,26 @@ void Store::attachGlobalMemory(JsonDocument *memory)
 void Store::setVar(const char *varName, long int value)
 {
     char *varNameWithScope = _withScope(varName);
+    VarStruct *var;
 
     // we can set only local variables. So need to add scope id
     SM_DEBUG("Set int var [" << varNameWithScope << "]: " << value << "\n");
     if (_localMemory.count(varNameWithScope))
     {
-        VarStruct *var = _localMemory[varNameWithScope];
+        var = _localMemory[varNameWithScope];
         var->type = VAR_TYPE_LONG;
         var->vInt = value;
         var->vFloat = (float)value;
     }
     else
     {
-        _localMemory[(char *)_keyCreator.createKey(varNameWithScope)] = new VarStruct(value);
+        var = new VarStruct(value);
+        _localMemory[(char *)_keyCreator.createKey(varNameWithScope)] = var;
+    }
+
+    if (_hooks)
+    {
+        _hooks->onVarUpdate(varName, var);
     }
 }
 
@@ -44,18 +56,26 @@ void Store::setVar(const char *var_name, int value)
 void Store::setVar(const char *varName, float value)
 {
     char *varNameWithScope = _withScope(varName);
+    VarStruct *var;
+
     // we can set only local variables. So need to add scope id
     SM_DEBUG("Set float var [" << varNameWithScope << "]: " << value << "\n");
     if (_localMemory.count(varNameWithScope) > 0)
     {
-        VarStruct *var = _localMemory[varNameWithScope];
+        var = _localMemory[varNameWithScope];
         var->type = VAR_TYPE_FLOAT;
         var->vInt = round(value);
         var->vFloat = value;
     }
     else
     {
-        _localMemory[(char *)_keyCreator.createKey(varNameWithScope)] = new VarStruct(value);
+        var = new VarStruct(value);
+        _localMemory[(char *)_keyCreator.createKey(varNameWithScope)] = var;
+    }
+
+    if (_hooks)
+    {
+        _hooks->onVarUpdate(varName, var);
     }
 }
 

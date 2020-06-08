@@ -5,6 +5,7 @@
 
 #include "../store/store.h"
 #include "../timers/timers.h"
+#include "../hooks/hooks.h"
 
 #define M_UNKNOWN -1
 
@@ -55,6 +56,8 @@ public:
     bool evalCondition(JsonVariant);
     bool switchCondition(const char *, JsonVariant);
     float evalMath(JsonVariant);
+
+    void setHooks(Hooks *hooks);
 
 private:
     Timers *_timers;

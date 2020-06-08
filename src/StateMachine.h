@@ -38,9 +38,11 @@ class StateMachineController; // forward declaration
 #include "keycompare/keycompare.h"
 #include "timers/timers.h"
 #include "store/store.h"
+#include "store/varStruct.h"
 #include "compute/compute.h"
 #include "plugin/plugin.h"
 #include "actioncontext/actioncontext.h"
+#include "hooks/hooks.h"
 
 #include "StateMachineDebug.h"
 
@@ -152,6 +154,7 @@ public:
   void setDefinition(JsonDocument *);
   void init();
   void cycle();
+  void setHooks(Hooks *);
 
 #ifdef SM_DEBUGGER
   void setDebugPrinter(DebugPrinter);
