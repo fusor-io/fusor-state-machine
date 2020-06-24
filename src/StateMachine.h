@@ -51,7 +51,7 @@ class StateMachineController; // forward declaration
  * {
  *  DEFINITION_INIT_ACTION:    ["action_name_1"],         // actions to execute when initializing device
  *  DEFINITION_BEFORE_ACTION:  ["action_name_2"],         // actions to execute starting the cycle
- *  DEFINITION_stateMachines: { "machine1": machine},    // definitions of actual state machines
+ *  DEFINITION_STATE_MACHINES: { "machine1": machine},    // definitions of actual state machines
  *  DEFINITION_AFTER_ACTION:   ["action_name_3"],         // actions to execute after the cycle
  *  DEFINITION_SLEEP_TIMEOUT:  "ctrl.var_name_1"          // variable defining sleep between cycles, default 1000 (ms)
  * }
@@ -152,6 +152,7 @@ public:
   void registerAction(const char *, ActionFunction);
   void registerPlugin(Plugin *);
   void setDefinition(JsonDocument *);
+  void setDefinition(JsonVariant);
   void init();
   void cycle();
   void setHooks(Hooks *);
@@ -163,7 +164,7 @@ public:
   // private:
   const char *_deviceId;
 
-  JsonDocument *_definition; // definition of the controller
+  JsonVariant _definition; // definition of the controller
 
   int _stateMachineCount = 0;
   STATE_MACHINE_SLOT _stateMachines[MAX_STATE_MACHINES];

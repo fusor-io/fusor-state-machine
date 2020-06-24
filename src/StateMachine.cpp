@@ -45,7 +45,12 @@ void StateMachineController::registerPlugin(Plugin *plugin)
 
 void StateMachineController::setDefinition(JsonDocument *definition)
 {
-  SM_DEBUG("State Machine definition: " << *definition << "\n");
+  setDefinition(definition->as<JsonVariant>());
+}
+
+void StateMachineController::setDefinition(JsonVariant definition)
+{
+  SM_DEBUG("State Machine definition: " << definition << "\n");
   _definition = definition;
 }
 
@@ -72,9 +77,9 @@ void StateMachineController::cycle()
 
   // Run actions berfore main loop
 
-  if (_definition->containsKey(DEFINITION_BEFORE_ACTION))
+  if (_definition.containsKey(DEFINITION_BEFORE_ACTION))
   {
-    _runActions((*_definition)[DEFINITION_BEFORE_ACTION]);
+    _runActions(_definition[DEFINITION_BEFORE_ACTION]);
   }
 
   // Run main loop of state machines
@@ -85,9 +90,9 @@ void StateMachineController::cycle()
 
   SM_DEBUG("Checking post loop actions\n");
 
-  if (_definition->containsKey(DEFINITION_AFTER_ACTION))
+  if (_definition.containsKey(DEFINITION_AFTER_ACTION))
   {
-    _runActions((*_definition)[DEFINITION_AFTER_ACTION]);
+    _runActions(_definition[DEFINITION_AFTER_ACTION]);
   }
 
   // Sleep for time specified in definition, or default 1000ms
@@ -96,9 +101,9 @@ void StateMachineController::cycle()
 
   SM_DEBUG("Reading sleep config\n");
 
-  if (_definition->containsKey(DEFINITION_SLEEP_TIMEOUT))
+  if (_definition.containsKey(DEFINITION_SLEEP_TIMEOUT))
   {
-    timeout = round(compute.evalMath((*_definition)[DEFINITION_SLEEP_TIMEOUT]));
+    timeout = round(compute.evalMath(_definition[DEFINITION_SLEEP_TIMEOUT]));
   }
 
   if (timeout > 0)
@@ -224,12 +229,12 @@ void StateMachineController::_runActions(JsonVariant actions)
 
 void StateMachineController::_runInitAction()
 {
-  _runActions((*_definition)[DEFINITION_INIT_ACTION]);
+  _runActions(_definition[DEFINITION_INIT_ACTION]);
 }
 
 void StateMachineController::_initStateMachines()
 {
-  auto state_machines = (*_definition)[DEFINITION_STATE_MACHINES];
+  auto state_machines = _definition[DEFINITION_STATE_MACHINES];
 
   if (!state_machines.is<JsonObject>())
     return;
