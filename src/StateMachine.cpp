@@ -71,9 +71,10 @@ void StateMachineController::setHooks(Hooks *hooks)
 
 void StateMachineController::cycle()
 {
+  cycleNum++;
 
   SM_DEBUG("==============================================================\n");
-  SM_DEBUG("Entering cycle\n");
+  SM_DEBUG("Entering cycle " << cycleNum << "\n");
 
   // Run actions berfore main loop
 

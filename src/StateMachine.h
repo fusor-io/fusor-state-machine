@@ -146,6 +146,7 @@ class StateMachineController
 public:
   Timers timers;
   Compute compute;
+  unsigned long cycleNum = 0;
 
   StateMachineController(const char *, SleepFunction, GetTimeFunction);
   void setActionRunner(ActionFunction);
