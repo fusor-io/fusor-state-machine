@@ -8,6 +8,10 @@
 #ifndef statemachine_h
 #define statemachine_h
 
+// Uncomment the following line and recompile library
+// to enable debugg printing
+// #define SM_DEBUGGER
+
 #define MAX_VAR_NAME_LEN 32     // maximum length of variable name ("device-id.var-name.type")
 #define MAX_VARIABLE_SPACE 1024 // maximum size of JSON storing local variables
 #define MAX_STATE_MACHINES 16

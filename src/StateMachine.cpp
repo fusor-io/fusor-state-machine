@@ -5,10 +5,6 @@
   MIT License
 */
 
-// Uncomment the following line and recompile library
-// to enable debugg printing
-// #define SM_DEBUGGER
-
 #include <math.h>
 
 #include "StateMachine.h"
