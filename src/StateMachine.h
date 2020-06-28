@@ -164,6 +164,7 @@ public:
 
   // private:
   const char *_deviceId;
+  Hooks *_hooks = nullptr;
 
   JsonVariant _definition; // definition of the controller
 

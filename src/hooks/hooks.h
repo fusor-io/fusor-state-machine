@@ -7,6 +7,7 @@ class Hooks
 {
 public:
     virtual void onVarUpdate(const char *, VarStruct *);
+    virtual void afterCycle();
 };
 
 #endif

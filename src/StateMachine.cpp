@@ -62,6 +62,7 @@ void StateMachineController::init()
 
 void StateMachineController::setHooks(Hooks *hooks)
 {
+  _hooks = hooks;
   compute.setHooks(hooks);
 }
 
@@ -113,6 +114,8 @@ void StateMachineController::cycle()
     _sleep((unsigned long)timeout);
   }
 
+  if (_hooks)
+    _hooks->afterCycle();
   SM_DEBUG("Exiting cycle\n");
 }
 
