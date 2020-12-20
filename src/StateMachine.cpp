@@ -62,6 +62,17 @@ void StateMachineController::setHooks(Hooks *hooks)
   compute.setHooks(hooks);
 }
 
+
+void StateMachineController::setVar(const char *varName, float value) {
+  compute.setVar(varName, value);
+
+}
+
+float StateMachineController::getVar(const char *varName, float defaultValue){
+  compute.getVar(varName, defaultValue);
+}
+
+
 /**************************************************************************
  *                             Main cycle
  **************************************************************************/

@@ -57,6 +57,9 @@ public:
     bool switchCondition(const char *, JsonVariant);
     float evalMath(JsonVariant);
 
+    void setVar(const char *, float);
+    float getVar(const char *, float defaultValue = 0.0f);
+
     void setHooks(Hooks *hooks);
 
 private:

@@ -9,7 +9,7 @@
 #define statemachine_h
 
 // Uncomment the following line and recompile library
-// to enable debugg printing
+// to enable debug printing
 // #define SM_DEBUGGER
 
 #define MAX_VAR_NAME_LEN 32     // maximum length of variable name ("device-id.var-name.type")
@@ -161,6 +161,9 @@ public:
   void init();
   void cycle();
   void setHooks(Hooks *);
+
+  void setVar(const char *, float);
+  float getVar(const char *, float defaultValue = 0.0f);
 
 #ifdef SM_DEBUGGER
   void setDebugPrinter(DebugPrinter);

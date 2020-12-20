@@ -114,7 +114,7 @@ VarStruct *Store::getVar(const char *varName)
     SM_DEBUG("Var " << varName << " not found\n");
 
     // var_name can be in a local format (no scope identifier)
-    // so try adding devideId as a scope
+    // so try adding deviceId as a scope
 
     char *varNameWithScope = _withScope(varName);
     if (_localMemory.count(varNameWithScope) > 0)
@@ -124,10 +124,6 @@ VarStruct *Store::getVar(const char *varName)
     }
 
     SM_DEBUG("Var " << varNameWithScope << " not found\n");
-
-    // last chance is that it is external variable
-    // if (_globalMemory)
-    //     return (*_globalMemory)[varName];
 
     return nullptr;
 }

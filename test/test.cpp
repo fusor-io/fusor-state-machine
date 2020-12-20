@@ -45,7 +45,7 @@ TEST(StateMachine, setVar_getVarInt)
   StateMachineController sm = StateMachineController("sm", NULL, getTime);
   sm.compute.store.setVar("test", 42);
   sm.compute.store.setVar("test0", 42);
-  sm.compute.store.setVar("test1", 137.1f);
+  sm.setVar("test1", 137.1f);
   ASSERT_EQ(sm.compute.store.getVarInt("test"), 42);
   ASSERT_EQ(sm.compute.store.getVarInt("test1"), 137);
   ASSERT_EQ(sm.compute.store.getVarInt("test2"), 0);
@@ -55,10 +55,10 @@ TEST(StateMachine, setVar_getVarInt)
 TEST(StateMachine, setVar_getVarFloat)
 {
   StateMachineController sm = StateMachineController("sm", NULL, getTime);
-  sm.compute.store.setVar("test", 42.0f);
-  ASSERT_EQ(sm.compute.store.getVarFloat("test"), 42.0f);
+  sm.setVar("test", 42.0f);
+  ASSERT_EQ(sm.getVar("test"), 42.0f);
   sm.compute.store.setVar("test2", 42);
-  ASSERT_EQ(sm.compute.store.getVarFloat("test2"), 42.0f);
+  ASSERT_EQ(sm.getVar("test2"), 42.0f);
 }
 
 long int foo1 = 0, foo2 = 0, foo3 = 0;

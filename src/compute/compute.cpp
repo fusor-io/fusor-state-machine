@@ -14,6 +14,15 @@ Compute::Compute(const char *deviceId, Timers *timers)
     _timers = timers;
 }
 
+void Compute::setVar(const char * varName, float value) {
+    store.setVar(varName, value);
+}
+
+float Compute::getVar(const char *varName, float defaultValue) {
+    store.getVarFloat(varName, defaultValue);
+}
+
+
 void Compute::setHooks(Hooks *hooks)
 {
     store.setHooks(hooks);
