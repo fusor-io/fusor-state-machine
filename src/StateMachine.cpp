@@ -68,10 +68,13 @@ void StateMachineController::setVar(const char *varName, float value) {
 
 }
 
-float StateMachineController::getVar(const char *varName, float defaultValue){
-  compute.getVar(varName, defaultValue);
+float StateMachineController::getVarFloat(const char *varName, float defaultValue){
+  compute.getVarFloat(varName, defaultValue);
 }
 
+long int StateMachineController::getVarInt(const char *varName, long int defaultValue){
+  compute.getVarInt(varName, defaultValue);
+}
 
 /**************************************************************************
  *                             Main cycle

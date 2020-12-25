@@ -18,10 +18,13 @@ void Compute::setVar(const char * varName, float value) {
     store.setVar(varName, value);
 }
 
-float Compute::getVar(const char *varName, float defaultValue) {
+float Compute::getVarFloat(const char *varName, float defaultValue) {
     store.getVarFloat(varName, defaultValue);
 }
 
+long int Compute::getVarInt(const char *varName, long int defaultValue) {
+    store.getVarInt(varName, defaultValue);
+}
 
 void Compute::setHooks(Hooks *hooks)
 {

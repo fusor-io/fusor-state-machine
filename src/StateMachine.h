@@ -163,7 +163,8 @@ public:
   void setHooks(Hooks *);
 
   void setVar(const char *, float);
-  float getVar(const char *, float defaultValue = 0.0f);
+  float getVarFloat(const char *, float defaultValue = 0.0f);
+  long int getVarInt(const char *, long int defaultValue = 0);
 
 #ifdef SM_DEBUGGER
   void setDebugPrinter(DebugPrinter);

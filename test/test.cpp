@@ -46,19 +46,19 @@ TEST(StateMachine, setVar_getVarInt)
   sm.compute.store.setVar("test", 42);
   sm.compute.store.setVar("test0", 42);
   sm.setVar("test1", 137.1f);
-  ASSERT_EQ(sm.compute.store.getVarInt("test"), 42);
-  ASSERT_EQ(sm.compute.store.getVarInt("test1"), 137);
-  ASSERT_EQ(sm.compute.store.getVarInt("test2"), 0);
-  ASSERT_EQ(sm.compute.store.getVarInt("test2", 7), 7);
+  ASSERT_EQ(sm.getVarInt("test"), 42);
+  ASSERT_EQ(sm.getVarInt("test1"), 137);
+  ASSERT_EQ(sm.getVarInt("test2"), 0);
+  ASSERT_EQ(sm.getVarInt("test2", 7), 7);
 }
 
 TEST(StateMachine, setVar_getVarFloat)
 {
   StateMachineController sm = StateMachineController("sm", NULL, getTime);
   sm.setVar("test", 42.0f);
-  ASSERT_EQ(sm.getVar("test"), 42.0f);
+  ASSERT_EQ(sm.getVarFloat("test"), 42.0f);
   sm.compute.store.setVar("test2", 42);
-  ASSERT_EQ(sm.getVar("test2"), 42.0f);
+  ASSERT_EQ(sm.getVarFloat("test2"), 42.0f);
 }
 
 long int foo1 = 0, foo2 = 0, foo3 = 0;
@@ -304,7 +304,7 @@ void sm_after_action(ActionContext *ctx) { ctx->compute->store.setVar("after", 1
 void sm1_action1(ActionContext *ctx) { ctx->compute->store.setVar("var1", 1); }
 void sm1_action2(ActionContext *ctx)
 {
-  int v = ctx->compute->store.getVarInt("var1");
+  int v = ctx->compute->getVarInt("var1");
   ctx->compute->store.setVar("var1", v + 42);
 }
 void sm1_action3(ActionContext *ctx) { ctx->compute->store.setVar("var1", 77); }
@@ -368,7 +368,7 @@ TEST(StateMachine, lifeCycle)
   sm.init();
 
   // check if controller init action was called
-  ASSERT_EQ(sm.compute.store.getVarInt("init"), 1);
+  ASSERT_EQ(sm.getVarInt("init"), 1);
 
   // check if machine(s) are stored
   ASSERT_EQ(sm._stateMachineCount, 1);
@@ -379,24 +379,24 @@ TEST(StateMachine, lifeCycle)
   // check if
   //   initial state machine action is called
   //   initial state action is called
-  ASSERT_EQ(sm.compute.store.getVarInt("var1"), 43);
+  ASSERT_EQ(sm.getVarInt("var1"), 43);
 
   // check if before and after actions are called when running cycle
-  ASSERT_EQ(sm.compute.store.getVarInt("before"), 0);
-  ASSERT_EQ(sm.compute.store.getVarInt("after"), 0);
+  ASSERT_EQ(sm.getVarInt("before"), 0);
+  ASSERT_EQ(sm.getVarInt("after"), 0);
   sm.cycle();
-  ASSERT_EQ(sm.compute.store.getVarInt("before"), 1);
-  ASSERT_EQ(sm.compute.store.getVarInt("after"), 1);
-  ASSERT_EQ(sm.compute.store.getVarInt("each_cycle"), 137);
+  ASSERT_EQ(sm.getVarInt("before"), 1);
+  ASSERT_EQ(sm.getVarInt("after"), 1);
+  ASSERT_EQ(sm.getVarInt("each_cycle"), 137);
 
   // check if machine is changed its state
   ASSERT_STREQ(sm._stateMachines[0].state, "sm1_state2");
-  ASSERT_EQ(sm.compute.store.getVarInt("var1"), 77);
+  ASSERT_EQ(sm.getVarInt("var1"), 77);
 
   sm.cycle();
   // check if machine is changed its state again
   ASSERT_STREQ(sm._stateMachines[0].state, "sm1_state1");
-  ASSERT_EQ(sm.compute.store.getVarInt("var1"), 77 + 42);
+  ASSERT_EQ(sm.getVarInt("var1"), 77 + 42);
 }
 
 void pluginAction(Plugin *pl)
@@ -422,8 +422,8 @@ TEST(StateMachine, plugin)
   JsonVariant actions = makeVariant("[\"plugin.act1\",\"plugin.act2\"]");
   sm._runActions(actions);
 
-  ASSERT_EQ(sm.compute.store.getVarInt("sm.plugin.pl_var1"), 42);
-  ASSERT_FLOAT_EQ(sm.compute.store.getVarFloat("sm.plugin.pl_var2"), 137.0f);
+  ASSERT_EQ(sm.getVarInt("sm.plugin.pl_var1"), 42);
+  ASSERT_FLOAT_EQ(sm.getVarFloat("sm.plugin.pl_var2"), 137.0f);
 }
 
 int main(int argc, char **argv)
