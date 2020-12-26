@@ -14,16 +14,20 @@ Compute::Compute(const char *deviceId, Timers *timers)
     _timers = timers;
 }
 
-void Compute::setVar(const char * varName, float value) {
-    store.setVar(varName, value);
+void Compute::setVar(const char * varName, float value, bool isLocal) {
+    store.setVar(varName, value, isLocal);
+}
+
+void Compute::setVar(const char * varName, long int value, bool isLocal) {
+    store.setVar(varName, value, isLocal);
 }
 
 float Compute::getVarFloat(const char *varName, float defaultValue) {
-    store.getVarFloat(varName, defaultValue);
+    return store.getVarFloat(varName, defaultValue);
 }
 
 long int Compute::getVarInt(const char *varName, long int defaultValue) {
-    store.getVarInt(varName, defaultValue);
+    return store.getVarInt(varName, defaultValue);
 }
 
 void Compute::setHooks(Hooks *hooks)

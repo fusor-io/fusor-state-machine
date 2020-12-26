@@ -22,12 +22,12 @@ void Store::attachGlobalMemory(JsonDocument *memory)
     _globalMemory = memory;
 }
 
-void Store::setVar(const char *varName, long int value)
+void Store::setVar(const char *varName, long int value, bool isLocal)
 {
-    char *varNameWithScope = _withScope(varName);
+    // for local variables we need to add scope id
+    char *varNameWithScope = isLocal ? _withScope(varName) : (char *)varName;
     VarStruct *var;
 
-    // we can set only local variables. So need to add scope id
     SM_DEBUG("Set int var [" << varNameWithScope << "]: " << value << "\n");
     if (_localMemory.count(varNameWithScope))
     {
@@ -48,17 +48,17 @@ void Store::setVar(const char *varName, long int value)
     }
 }
 
-void Store::setVar(const char *var_name, int value)
+void Store::setVar(const char *var_name, int value, bool isLocal)
 {
-    setVar(var_name, (long int)value);
+    setVar(var_name, (long int)value, isLocal);
 }
 
-void Store::setVar(const char *varName, float value)
+void Store::setVar(const char *varName, float value, bool isLocal)
 {
-    char *varNameWithScope = _withScope(varName);
+    // for local variables we need to add scope id
+    char *varNameWithScope = isLocal ? _withScope(varName) : (char *)varName;
     VarStruct *var;
 
-    // we can set only local variables. So need to add scope id
     SM_DEBUG("Set float var [" << varNameWithScope << "]: " << value << "\n");
     if (_localMemory.count(varNameWithScope) > 0)
     {
@@ -102,7 +102,6 @@ float Store::getVarFloat(const char *name, float defaultValue)
 VarStruct *Store::getVar(const char *varName)
 {
     // first check in local variables
-
     SM_DEBUG("Get var: " << varName << "\n");
 
     if (_localMemory.count((char *)varName) > 0)

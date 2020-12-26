@@ -57,7 +57,8 @@ public:
     bool switchCondition(const char *, JsonVariant);
     float evalMath(JsonVariant);
 
-    void setVar(const char *, float);
+    void setVar(const char *, float, bool isLocal = true);
+    void setVar(const char *, long int, bool isLocal = true);
     float getVarFloat(const char *, float defaultValue = 0.0f);
     long int getVarInt(const char *, long int defaultValue = 0);
 

@@ -18,9 +18,9 @@ public:
     void setHooks(Hooks *);
     void attachGlobalMemory(JsonDocument *);
 
-    void setVar(const char *, long int);
-    void setVar(const char *, int);
-    void setVar(const char *, float);
+    void setVar(const char *, long int, bool isLocal = true);
+    void setVar(const char *, int, bool isLocal = true);
+    void setVar(const char *, float, bool isLocal = true);
 
     long int getVarInt(const char *, int defaultValue = 0);
     float getVarFloat(const char *, float defaultValue = 0.0f);

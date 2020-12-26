@@ -62,18 +62,20 @@ void StateMachineController::setHooks(Hooks *hooks)
   compute.setHooks(hooks);
 }
 
+void StateMachineController::setVar(const char *varName, float value, bool isLocal) {
+  compute.setVar(varName, value, isLocal);
+}
 
-void StateMachineController::setVar(const char *varName, float value) {
-  compute.setVar(varName, value);
-
+void StateMachineController::setVar(const char *varName, long int value, bool isLocal) {
+  compute.setVar(varName, value, isLocal);
 }
 
 float StateMachineController::getVarFloat(const char *varName, float defaultValue){
-  compute.getVarFloat(varName, defaultValue);
+  return compute.getVarFloat(varName, defaultValue);
 }
 
 long int StateMachineController::getVarInt(const char *varName, long int defaultValue){
-  compute.getVarInt(varName, defaultValue);
+  return compute.getVarInt(varName, defaultValue);
 }
 
 /**************************************************************************
