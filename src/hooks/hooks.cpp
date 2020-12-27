@@ -2,4 +2,4 @@
 #include <Arduino.h>
 
 void Hooks::onVarUpdate(const char *name, VarStruct *value) {}
-void Hooks::afterCycle() {}
+void Hooks::afterCycle(unsigned long cycleNum) {}

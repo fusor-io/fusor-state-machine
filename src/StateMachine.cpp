@@ -127,7 +127,7 @@ void StateMachineController::cycle()
   }
 
   if (_hooks)
-    _hooks->afterCycle();
+    _hooks->afterCycle(cycleNum);
   SM_DEBUG("Exiting cycle\n");
 }
 
