@@ -51,7 +51,7 @@ public:
     }
     inline Trace &operator<<(float value)
     {
-        // on Arduion "%f" does not work
+        // on Arduino "%f" does not work
         // so we produce fixed #.#### format manually
 
         long int fixed = (long int)(value * 10000.0 + 0.5);

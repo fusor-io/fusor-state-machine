@@ -20,24 +20,29 @@ void Plugin::registerAction(const char *name, PluginFunction action)
     actionMap[name] = action;
 }
 
+void Plugin::setVar(const char *name, long int value)
+{
+    sm->setVar(_withScope(name), value);
+}
+
 void Plugin::setVar(const char *name, int value)
 {
-    sm->compute.store.setVar(_withScope(name), value);
+    sm->setVar(_withScope(name), (long int)value);
 }
 
 void Plugin::setVar(const char *name, float value)
 {
-    sm->compute.store.setVar(_withScope(name), value);
+    sm->setVar(_withScope(name), value);
 }
 
 int Plugin::getVarInt(const char *name, int defaultValue)
 {
-    return sm->compute.store.getVarInt(_withScope(name), defaultValue);
+    return sm->getVarInt(_withScope(name), defaultValue);
 }
 
 float Plugin::getVarFloat(const char *name, float defaultValue)
 {
-    return sm->compute.store.getVarFloat(_withScope(name), defaultValue);
+    return sm->getVarFloat(_withScope(name), defaultValue);
 }
 
 VarStruct *Plugin::getVarRaw(const char *name)

@@ -20,6 +20,7 @@ public:
 
     virtual void initialize(StateMachineController *);
     void registerAction(const char *, PluginFunction);
+    void setVar(const char *, long int);
     void setVar(const char *, int);
     void setVar(const char *, float);
     int getVarInt(const char *, int defaultValue = 0);
