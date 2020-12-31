@@ -22,7 +22,8 @@ public:
     unsigned long getTime();
     bool validateTimer(const char *, unsigned long);
 
-    unsigned long elapsed(unsigned long, unsigned long);
+    unsigned long diff(unsigned long, unsigned long);
+    unsigned long elapsed(unsigned long);
 };
 
 #endif

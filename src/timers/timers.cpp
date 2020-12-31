@@ -44,7 +44,7 @@ bool Timers::validateTimer(const char *timerName, unsigned long timeout)
         }
         else
         {
-            if (elapsed(slot.startTime, getTime()) >= timeout)
+            if (elapsed(slot.startTime) >= timeout)
             {
                 _timerMap[timerName].isElapsed = true;
                 return true;
@@ -62,7 +62,12 @@ bool Timers::validateTimer(const char *timerName, unsigned long timeout)
     }
 }
 
-unsigned long Timers::elapsed(unsigned long start, unsigned long end)
+unsigned long Timers::elapsed(unsigned long startTime)
+{
+    return diff(startTime, getTime());
+}
+
+unsigned long Timers::diff(unsigned long start, unsigned long end)
 {
     // we should handle time overflow condition
     // if end < start it means we had overflow

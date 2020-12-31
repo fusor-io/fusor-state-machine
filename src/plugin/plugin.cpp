@@ -54,3 +54,8 @@ char *Plugin::_withScope(const char *varName)
 {
     return _keyCreator.withScope(id, varName);
 }
+
+unsigned long Plugin::getElapsedTime(unsigned long startTime)
+{
+    return sm->timers.elapsed(startTime);
+}

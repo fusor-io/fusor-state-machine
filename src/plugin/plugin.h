@@ -27,6 +27,8 @@ public:
     float getVarFloat(const char *, float defaultValue = 0.0f);
     VarStruct *getVarRaw(const char *);
 
+    unsigned long getElapsedTime(unsigned long);
+
     std::map<const char *, PluginFunction, KeyCompare> actionMap;
 
     ActionContext *actionContext;
