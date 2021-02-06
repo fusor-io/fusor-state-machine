@@ -20,6 +20,27 @@ typedef struct VarStruct
     char type;
     volatile long int vInt;
     volatile float vFloat;
+
+    void operator=(long int &value)
+    {
+        type = VAR_TYPE_LONG;
+        vInt = value;
+        vFloat = (float)value;
+    }
+
+    void operator=(int &value)
+    {
+        type = VAR_TYPE_LONG;
+        vInt = value;
+        vFloat = (float)value;
+    }
+
+    void operator=(float &value)
+    {
+        type = VAR_TYPE_FLOAT;
+        vInt = round(value);
+        vFloat = value;
+    }
 } VarStruct;
 
 #endif

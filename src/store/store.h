@@ -26,6 +26,10 @@ public:
     float getVarFloat(const char *, float defaultValue = 0.0f);
     VarStruct *getVar(const char *);
 
+    VarStruct *updateVar(VarStruct *, const char *, long int, bool onlyOnValueChange = true);
+    VarStruct *updateVar(VarStruct *, const char *, int, bool onlyOnValueChange = true);
+    VarStruct *updateVar(VarStruct *, const char *, float, bool onlyOnValueChange = true);
+
 private:
     std::map<char *, VarStruct *, KeyCompare> _localMemory; // local device variables
     JsonDocument *_globalMemory;                            // global variables populated from server

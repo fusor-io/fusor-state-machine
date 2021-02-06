@@ -32,9 +32,7 @@ void Store::setVar(const char *varName, long int value, bool isLocal)
     if (_localMemory.count(varNameWithScope))
     {
         var = _localMemory[varNameWithScope];
-        var->type = VAR_TYPE_LONG;
-        var->vInt = value;
-        var->vFloat = (float)value;
+        *var = value;
     }
     else
     {
@@ -63,9 +61,7 @@ void Store::setVar(const char *varName, float value, bool isLocal)
     if (_localMemory.count(varNameWithScope) > 0)
     {
         var = _localMemory[varNameWithScope];
-        var->type = VAR_TYPE_FLOAT;
-        var->vInt = round(value);
-        var->vFloat = value;
+        *var = value;
     }
     else
     {
@@ -125,6 +121,43 @@ VarStruct *Store::getVar(const char *varName)
     SM_DEBUG("Var " << varNameWithScope << " not found\n");
 
     return nullptr;
+}
+
+VarStruct *Store::updateVar(VarStruct *var, const char *varName, long int value, bool onlyOnValueChange)
+{
+    VarStruct *variable = var == nullptr ? var : getVar(varName);
+    if (variable == nullptr) return nullptr;
+    
+    if (onlyOnValueChange && variable->vInt == value)
+        return variable;
+
+    *variable = value;
+
+    if (_hooks)
+        _hooks->onVarUpdate(varName, variable);
+
+    return variable;
+}
+
+VarStruct *Store::updateVar(VarStruct *var, const char *varName, int value, bool onlyOnValueChange)
+{
+    return updateVar(var, varName, (long int)value, onlyOnValueChange);
+}
+
+VarStruct *Store::updateVar(VarStruct *var, const char *varName, float value, bool onlyOnValueChange)
+{
+    VarStruct *variable = var == nullptr ? var : getVar(varName);
+    if (variable == nullptr) return nullptr;
+    
+    if (onlyOnValueChange && variable->vFloat == value)
+        return variable;
+
+    *variable = value;
+
+    if (_hooks)
+        _hooks->onVarUpdate(varName, variable);
+
+    return variable;
 }
 
 char *Store::_withScope(const char *var_name)
