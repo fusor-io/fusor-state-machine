@@ -126,8 +126,15 @@ VarStruct *Store::getVar(const char *varName)
 VarStruct *Store::updateVar(VarStruct *var, const char *varName, long int value, bool onlyOnValueChange)
 {
     VarStruct *variable = var == nullptr ? var : getVar(varName);
-    if (variable == nullptr) return nullptr;
-    
+    if (variable == nullptr)
+    {
+        setVar(varName, value);
+        if (_hooks)
+            _hooks->onVarUpdate(varName, variable);
+
+        return getVar(varName);
+    };
+
     if (onlyOnValueChange && variable->vInt == value)
         return variable;
 
@@ -147,8 +154,16 @@ VarStruct *Store::updateVar(VarStruct *var, const char *varName, int value, bool
 VarStruct *Store::updateVar(VarStruct *var, const char *varName, float value, bool onlyOnValueChange)
 {
     VarStruct *variable = var == nullptr ? var : getVar(varName);
-    if (variable == nullptr) return nullptr;
-    
+
+    if (variable == nullptr)
+    {
+        setVar(varName, value);
+        if (_hooks)
+            _hooks->onVarUpdate(varName, variable);
+
+        return getVar(varName);
+    };
+
     if (onlyOnValueChange && variable->vFloat == value)
         return variable;
 

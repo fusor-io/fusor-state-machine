@@ -50,6 +50,21 @@ VarStruct *Plugin::getVarRaw(const char *name)
     return sm->compute.store.getVar(_withScope(name));
 }
 
+VarStruct *Plugin::updateVar(VarStruct *var, const char *varName, long int value, bool onlyOnValueChange)
+{
+    return sm->compute.store.updateVar(var, _withScope(varName), value, onlyOnValueChange);
+}
+
+VarStruct *Plugin::updateVar(VarStruct *var, const char *varName, int value, bool onlyOnValueChange)
+{
+    return sm->compute.store.updateVar(var, _withScope(varName), value, onlyOnValueChange);
+}
+
+VarStruct *Plugin::updateVar(VarStruct *var, const char *varName, float value, bool onlyOnValueChange)
+{
+    return sm->compute.store.updateVar(var, _withScope(varName), value, onlyOnValueChange);
+}
+
 char *Plugin::_withScope(const char *varName)
 {
     return _keyCreator.withScope(id, varName);

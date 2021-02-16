@@ -27,6 +27,10 @@ public:
     float getVarFloat(const char *, float defaultValue = 0.0f);
     VarStruct *getVarRaw(const char *);
 
+    VarStruct *updateVar(VarStruct *, const char *, long int, bool onlyOnValueChange = true);
+    VarStruct *updateVar(VarStruct *, const char *, int, bool onlyOnValueChange = true);
+    VarStruct *updateVar(VarStruct *, const char *, float, bool onlyOnValueChange = true);
+
     unsigned long getElapsedTime(unsigned long);
 
     std::map<const char *, PluginFunction, KeyCompare> actionMap;
