@@ -362,7 +362,7 @@ void StateMachineController::_runStateMachines()
     if (nextState == nullptr)
       continue;
 
-    // swith state
+    // switch state
     _switchState(&_stateMachines[i], nextState);
   }
 }
