@@ -231,6 +231,11 @@ TEST(StateMachine, evalMath)
   ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"max\":[40,42,41]}")), 42.0f);
 
   ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"sum\":[{\"sqrt\":[64]},{\"mul\":[2,17]}]}")), 42.0f);
+
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"diff\":[10,20]}")), 10.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"diff\":[20,10]}")), 10.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"diff\":[-10,10]}")), 20.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"diff\":[10,-10]}")), 20.0f);
 }
 
 TEST(StateMachine, switchCondition)

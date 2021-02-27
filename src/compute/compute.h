@@ -9,24 +9,28 @@
 
 #define M_UNKNOWN -1
 
-#define M_UNARY 0
-#define M_SQRT 1
-#define M_EXP 2
-#define M_LN 3
-#define M_LOG 4
-#define M_ABS 5
-#define M_NEG 6
+#define M_NULLARY 0
+#define M_NOW 1
 
-#define M_BINARY 100
-#define M_SUB 101
-#define M_DIV 102
-#define M_POW 103
+#define M_UNARY 100
+#define M_SQRT 101
+#define M_EXP 102
+#define M_LN 103
+#define M_LOG 104
+#define M_ABS 105
+#define M_NEG 106
 
-#define M_MULTI 200
-#define M_SUM 201
-#define M_MUL 202
-#define M_MIN 203
-#define M_MAX 204
+#define M_BINARY 200
+#define M_SUB 201
+#define M_DIV 202
+#define M_POW 203
+#define M_DIFF 204
+
+#define M_MULTI 300
+#define M_SUM 301
+#define M_MUL 302
+#define M_MIN 303
+#define M_MAX 304
 
 #define C_UNKNOWN -1
 

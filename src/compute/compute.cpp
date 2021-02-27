@@ -215,7 +215,17 @@ float Compute::evalMath(JsonVariant object)
 
     int op = _decodeMathOp(operation);
 
-    if (op > M_UNARY && op < M_BINARY)
+    if (op > M_NULLARY && op < M_UNARY)
+    {
+        switch (op)
+        {
+        case M_NOW:
+            return (float)_timers->getTime();
+        default:
+            return 0.0f;
+        }
+    }
+    else if (op > M_UNARY && op < M_BINARY)
     {
 
         // unary operations
@@ -303,9 +313,15 @@ float Compute::evalMath(JsonVariant object)
             return evalMath(operands[0]) / evalMath(operands[1]);
 
         case M_POW:
-        default:
 
             return pow(evalMath(operands[0]), evalMath(operands[1]));
+
+        case M_DIFF:
+        default:
+
+            unsigned long a = round(evalMath(operands[0]));
+            unsigned long b = round(evalMath(operands[1]));
+            return (float)std::min(_timers->diff(a, b), _timers->diff(b, a));
         }
     }
     else if (op > M_MULTI)
@@ -384,6 +400,10 @@ int Compute::_decodeMathOp(const char *op)
         return M_MIN;
     if (strcasecmp(op, "max") == 0)
         return M_MAX;
+    if (strcasecmp(op, "now") == 0) // current time in OS units (provided by _getTimeCallback)
+        return M_NOW;
+    if (strcasecmp(op, "diff") == 0) // time difference in OS units, for short periods (timer overflow safe)
+        return M_DIFF;
 
     return M_UNKNOWN;
 }
