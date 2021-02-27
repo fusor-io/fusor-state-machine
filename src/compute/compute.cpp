@@ -219,7 +219,7 @@ float Compute::evalMath(JsonVariant object)
     {
         switch (op)
         {
-        case M_NOW:
+        case M_TICKS:
             return (float)_timers->getTime();
         default:
             return 0.0f;
@@ -400,8 +400,8 @@ int Compute::_decodeMathOp(const char *op)
         return M_MIN;
     if (strcasecmp(op, "max") == 0)
         return M_MAX;
-    if (strcasecmp(op, "now") == 0) // current time in OS units (provided by _getTimeCallback)
-        return M_NOW;
+    if (strcasecmp(op, "ticks") == 0) // current time in OS units (provided by _getTimeCallback)
+        return M_TICKS;
     if (strcasecmp(op, "diff") == 0) // time difference in OS units, for short periods (timer overflow safe)
         return M_DIFF;
 

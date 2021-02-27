@@ -238,7 +238,7 @@ TEST(StateMachine, evalMath)
   ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"diff\":[10,-10]}")), 20.0f);
 
   _time = 137;
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"now\":[]}")), 137.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"ticks\":[]}")), 137.0f);
 }
 
 TEST(StateMachine, switchCondition)

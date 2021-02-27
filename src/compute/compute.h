@@ -10,7 +10,7 @@
 #define M_UNKNOWN -1
 
 #define M_NULLARY 0
-#define M_NOW 1
+#define M_TICKS 1
 
 #define M_UNARY 100
 #define M_SQRT 101
