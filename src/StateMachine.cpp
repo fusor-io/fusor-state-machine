@@ -412,9 +412,17 @@ const char *StateMachineController::_getNextState(JsonArray rules)
 
     SM_DEBUG("Evaluate condition: " << condition << "\n");
 
+    // is rule satisfied ?
     if (compute.evalCondition(rule[STATE_RULE_IF]))
     {
-      // rule satisfied, return next state name
+      // run exit actions (if defined)
+      if (!rule[STATE_RULE_EXIT_ACTIONS].isNull())
+      {
+        SM_DEBUG("Running exit actions\n");
+        _runActions(rule[STATE_RULE_EXIT_ACTIONS]);
+      }
+
+      // return next state name
       SM_DEBUG("Rule satisfied, switching to state: " << targetState << "\n");
       return targetState;
     }

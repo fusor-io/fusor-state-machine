@@ -25,7 +25,8 @@
 #define STATE_ENTRY_ACTIONS "a"       // actions to run when entering state
 #define STATE_EXIT_RULES "r"          // rules to check if any state exit conditions are met
 #define STATE_RULE_IF "i"             // of "if" rule
-#define STATE_RULE_THEN "t"           // "then" part of "if" rule
+#define STATE_RULE_THEN "t"           // "then" part of "if" rule (next state)
+#define STATE_RULE_EXIT_ACTIONS "a"   // exit actions if rule is satisfied (before next state)
 
 #define SM_INITIAL_STATE "i"          // initial state machine state
 #define SM_INITIAL_ACTIONS "a"        // initial actios to run (executed only once)

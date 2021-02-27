@@ -376,6 +376,7 @@ void sm1_action4(ActionContext *ctx)
 {
   ctx->compute->store.setVar("each_cycle", 137);
 }
+void sm1_action5(ActionContext *ctx) { ctx->compute->store.setVar("exit", 1); }
 
 TEST(StateMachine, lifeCycle)
 {
@@ -396,7 +397,8 @@ TEST(StateMachine, lifeCycle)
             {\
               \"i\":\
                 {\"gt\": [\"sm.var1\", 42]},\
-              \"t\": \"sm1_state2\"\
+              \"t\": \"sm1_state2\",\
+              \"a\": [\"sm1_action5\"]\
             }\
     	   ]\
         },\
@@ -429,6 +431,7 @@ TEST(StateMachine, lifeCycle)
   sm.registerAction("sm1_action2", sm1_action2);
   sm.registerAction("sm1_action3", sm1_action3);
   sm.registerAction("sm1_action4", sm1_action4);
+  sm.registerAction("sm1_action5", sm1_action5);
   sm.init();
 
   // check if controller init action was called
@@ -453,9 +456,10 @@ TEST(StateMachine, lifeCycle)
   ASSERT_EQ(sm.getVarInt("after"), 1);
   ASSERT_EQ(sm.getVarInt("each_cycle"), 137);
 
-  // check if machine is changed its state
+  // check if machine is changed its state and exit action performed
   ASSERT_STREQ(sm._stateMachines[0].state, "sm1_state2");
   ASSERT_EQ(sm.getVarInt("var1"), 77);
+  ASSERT_EQ(sm.getVarInt("exit"), 1);
 
   sm.cycle();
   // check if machine is changed its state again
