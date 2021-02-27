@@ -236,6 +236,9 @@ TEST(StateMachine, evalMath)
   ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"diff\":[20,10]}")), 10.0f);
   ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"diff\":[-10,10]}")), 20.0f);
   ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"diff\":[10,-10]}")), 20.0f);
+
+  _time = 137;
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"now\":[]}")), 137.0f);
 }
 
 TEST(StateMachine, switchCondition)
@@ -334,6 +337,7 @@ TEST(StateMachine, evalCondition_elapsed)
   JsonVariant cond1000 = conditions[1];
   JsonVariant cond2 = conditions[2];
 
+  _time = 0;
   ASSERT_FALSE(sm.compute.evalCondition(cond100));
   ASSERT_FALSE(sm.compute.evalCondition(cond1000));
 
