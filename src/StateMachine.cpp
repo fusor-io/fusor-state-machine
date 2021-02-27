@@ -62,19 +62,23 @@ void StateMachineController::setHooks(Hooks *hooks)
   compute.setHooks(hooks);
 }
 
-void StateMachineController::setVar(const char *varName, float value, bool isLocal) {
+void StateMachineController::setVar(const char *varName, float value, bool isLocal)
+{
   compute.setVar(varName, value, isLocal);
 }
 
-void StateMachineController::setVar(const char *varName, long int value, bool isLocal) {
+void StateMachineController::setVar(const char *varName, long int value, bool isLocal)
+{
   compute.setVar(varName, value, isLocal);
 }
 
-float StateMachineController::getVarFloat(const char *varName, float defaultValue){
+float StateMachineController::getVarFloat(const char *varName, float defaultValue)
+{
   return compute.getVarFloat(varName, defaultValue);
 }
 
-long int StateMachineController::getVarInt(const char *varName, long int defaultValue){
+long int StateMachineController::getVarInt(const char *varName, long int defaultValue)
+{
   return compute.getVarInt(varName, defaultValue);
 }
 
@@ -196,9 +200,20 @@ void StateMachineController::_runActionWithParams(JsonObject actions)
       continue;
     JsonArray params = item.as<JsonArray>();
 
-    _actionContext.setParams(&params);
-    _runAction(actionId);
-    _actionContext.resetParams();
+    if (strcasecmp(actionId, ASSIGNMENT_ACTION_ID) == 0)
+    {
+      // variable assignment action (variable := expression)
+      if (params.size() < 2 || !params[0].is<char *>())
+        return;
+      _runAssignmentAction(params[0], params[1]);
+    }
+    else
+    {
+      // regular actions
+      _actionContext.setParams(&params);
+      _runAction(actionId);
+      _actionContext.resetParams();
+    }
   }
 }
 
@@ -241,6 +256,11 @@ void StateMachineController::_runActions(JsonVariant actions)
       _yield();
     }
   }
+}
+
+void StateMachineController::_runAssignmentAction(const char *varName, JsonVariant expression)
+{
+  setVar(varName, compute.evalMath(expression));
 }
 
 void StateMachineController::_runInitAction()

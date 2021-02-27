@@ -29,6 +29,8 @@ void debugPrinter(const char *message)
   std::cout << message;
 }
 
+
+
 TEST(StateMachine, CreateSM)
 {
   StateMachineController sm = StateMachineController("test", NULL, getTime);
@@ -50,6 +52,30 @@ TEST(StateMachine, setVar_getVarInt)
   ASSERT_EQ(sm.getVarInt("test1"), 137);
   ASSERT_EQ(sm.getVarInt("test2"), 0);
   ASSERT_EQ(sm.getVarInt("test2", 7), 7);
+}
+
+TEST(StateMachine, updateVarInt)
+{
+  StateMachineController sm = StateMachineController("sm", NULL, getTime);
+  VarStruct *var = sm.compute.store.updateVar(nullptr, "test", 42);
+  ASSERT_EQ(var->vInt, 42);
+  ASSERT_EQ(var->vFloat, 42.0f);
+  
+  sm.compute.store.updateVar(var, "test", 137);
+  ASSERT_EQ(var->vInt, 137);
+  ASSERT_EQ(var->vFloat, 137.0f);
+}
+
+TEST(StateMachine, updateVarFloat)
+{
+  StateMachineController sm = StateMachineController("sm", NULL, getTime);
+  VarStruct *var = sm.compute.store.updateVar(nullptr, "test", 42.0f);
+  ASSERT_EQ(var->vInt, 42);
+  ASSERT_EQ(var->vFloat, 42.0f);
+  
+  sm.compute.store.updateVar(var, "test", 137.0f);
+  ASSERT_EQ(var->vInt, 137);
+  ASSERT_EQ(var->vFloat, 137.0f);
 }
 
 TEST(StateMachine, setVar_getVarFloat)
@@ -103,6 +129,35 @@ TEST(StateMachine, registerAction_runActionWitParams)
   foo2 = 0;
   sm._runAction(action2);
   ASSERT_EQ(foo2, 0);
+}
+
+TEST(StateMachine, registerAction_runAssignmentAction)
+{
+  StateMachineController sm = StateMachineController("sm", NULL, getTime);
+
+  sm.compute.store.setVar("var1", 136);
+  long int var1 = sm.compute.store.getVarInt("var1");
+  ASSERT_EQ(var1, 136);
+
+  // should evaluate and assign
+  JsonVariant action1 = makeVariant("{\":=\":[\"var1\", { \"sum\": [1,41]}]}");
+  sm._runAction(action1);
+
+  var1 = sm.compute.store.getVarInt("var1");
+  ASSERT_EQ(var1, 42);
+
+  // should not fail with bad data
+  JsonVariant action2 = makeVariant("{\":=\":[\"var1\"]}");
+  sm._runAction(action2);
+
+  var1 = sm.compute.store.getVarInt("var1");
+  ASSERT_EQ(var1, 42);
+
+  JsonVariant action3 = makeVariant("{\":=\":\"\"}");
+  sm._runAction(action3);
+
+  var1 = sm.compute.store.getVarInt("var1");
+  ASSERT_EQ(var1, 42);
 }
 
 TEST(StateMachine, runActions)

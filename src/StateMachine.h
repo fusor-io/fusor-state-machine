@@ -16,21 +16,23 @@
 #define MAX_VARIABLE_SPACE 1024 // maximum size of JSON storing local variables
 #define MAX_STATE_MACHINES 16
 
-#define DEFINITION_INIT_ACTION "i"
-#define DEFINITION_BEFORE_ACTION "b"
-#define DEFINITION_AFTER_ACTION "a"
-#define DEFINITION_STATE_MACHINES "s"
-#define DEFINITION_SLEEP_TIMEOUT "t"
+#define DEFINITION_INIT_ACTION "i"    // actions to run once before startin state machine
+#define DEFINITION_BEFORE_ACTION "b"  // actions to run before each state machines update cycle
+#define DEFINITION_AFTER_ACTION "a"   // actions to run after each statem machines update cycle
+#define DEFINITION_STATE_MACHINES "s" // definitions of all state machines
+#define DEFINITION_SLEEP_TIMEOUT "t"  // time to wait before running next update cycle
 
-#define STATE_ENTRY_ACTIONS "a"
-#define STATE_EXIT_RULES "r"
-#define STATE_RULE_IF "i"
-#define STATE_RULE_THEN "t"
+#define STATE_ENTRY_ACTIONS "a"       // actions to run when entering state
+#define STATE_EXIT_RULES "r"          // rules to check if any state exit conditions are met
+#define STATE_RULE_IF "i"             // of "if" rule
+#define STATE_RULE_THEN "t"           // "then" part of "if" rule
 
-#define SM_INITIAL_STATE "i"
-#define SM_INITIAL_ACTIONS "a"
-#define SM_BEFORE_CYCLE_ACTIONS "b"
-#define SM_STATES "s"
+#define SM_INITIAL_STATE "i"          // initial state machine state
+#define SM_INITIAL_ACTIONS "a"        // initial actios to run (executed only once)
+#define SM_BEFORE_CYCLE_ACTIONS "b"   // actions to run before each specific state machine cycle
+#define SM_STATES "s"                 // state definitios of state machine
+
+#define ASSIGNMENT_ACTION_ID ":="
 
 class StateMachineController; // forward declaration
 
@@ -191,6 +193,7 @@ public:
   void _runAction(const char *);
   void _runActions(JsonVariant);
   void _runActionWithParams(JsonObject);
+  void _runAssignmentAction(const char *, JsonVariant);
   void _runPluginActions(const char *);
   void _runInitAction();
   void _initStateMachines();
