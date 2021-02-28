@@ -33,6 +33,16 @@ void StateMachineController::registerAction(const char *name, ActionFunction fun
   _actionMap[name] = func;
 }
 
+void StateMachineController::registerFunction(const char *name, MathFunction func)
+{
+  compute.registerFunction(name, func);
+}
+
+void StateMachineController::registerFunction(const char *name, BoolFunction func)
+{
+  compute.registerFunction(name, func);
+}
+
 void StateMachineController::registerPlugin(Plugin *plugin)
 {
   _pluginMap[plugin->id] = plugin;

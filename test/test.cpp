@@ -29,8 +29,6 @@ void debugPrinter(const char *message)
   std::cout << message;
 }
 
-
-
 TEST(StateMachine, CreateSM)
 {
   StateMachineController sm = StateMachineController("test", NULL, getTime);
@@ -60,7 +58,7 @@ TEST(StateMachine, updateVarInt)
   VarStruct *var = sm.compute.store.updateVar(nullptr, "test", 42);
   ASSERT_EQ(var->vInt, 42);
   ASSERT_EQ(var->vFloat, 42.0f);
-  
+
   sm.compute.store.updateVar(var, "test", 137);
   ASSERT_EQ(var->vInt, 137);
   ASSERT_EQ(var->vFloat, 137.0f);
@@ -72,7 +70,7 @@ TEST(StateMachine, updateVarFloat)
   VarStruct *var = sm.compute.store.updateVar(nullptr, "test", 42.0f);
   ASSERT_EQ(var->vInt, 42);
   ASSERT_EQ(var->vFloat, 42.0f);
-  
+
   sm.compute.store.updateVar(var, "test", 137.0f);
   ASSERT_EQ(var->vInt, 137);
   ASSERT_EQ(var->vFloat, 137.0f);
@@ -239,6 +237,33 @@ TEST(StateMachine, evalMath)
 
   _time = 137;
   ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"ticks\":[]}")), 137.0f);
+}
+
+float customMath(ActionContext *context)
+{
+  return (context->getParamFloat(0) + context->getParamFloat(1)) / context->getParamFloat(2);
+}
+
+TEST(StateMachine, evalCustomMath)
+{
+  StateMachineController sm = StateMachineController("sm", NULL, getTime);
+  sm.registerFunction("test", customMath);
+
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"test\":[7,3,5]}")), 2.0f);
+}
+
+bool customBool(ActionContext *context)
+{
+  return (context->getParamFloat(0) + context->getParamFloat(1)) > context->getParamFloat(2);
+}
+
+TEST(StateMachine, evalCustomBool)
+{
+  StateMachineController sm = StateMachineController("sm", NULL, getTime);
+  sm.registerFunction("test", customBool);
+
+  ASSERT_TRUE(sm.compute.evalCondition(makeVariant("{\"test\":[7,3,5]}")));
+  ASSERT_FALSE(sm.compute.evalCondition(makeVariant("{\"test\":[7,3,42]}")));
 }
 
 TEST(StateMachine, switchCondition)

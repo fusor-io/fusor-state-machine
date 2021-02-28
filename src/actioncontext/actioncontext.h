@@ -1,6 +1,8 @@
 #ifndef actioncontext_h
 #define actioncontext_h
 
+class ActionContext; // forward ref
+
 #include <ArduinoJson.h>
 #include "../compute/compute.h"
 

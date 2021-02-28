@@ -1,11 +1,17 @@
 #ifndef compute_h
 #define compute_h
 
+class Compute; // forward ref
+
+#include <map>
+
 #include <ArduinoJson.h>
 
 #include "../store/store.h"
 #include "../timers/timers.h"
 #include "../hooks/hooks.h"
+#include "../actioncontext/actioncontext.h"
+#include "../keycompare/keycompare.h"
 
 #define M_UNKNOWN -1
 
@@ -50,12 +56,18 @@
 #define C_SYSTEM 1000
 #define C_ELAPSED 1001
 
+typedef float (*MathFunction)(ActionContext *);
+typedef bool (*BoolFunction)(ActionContext *);
+
 class Compute
 {
 public:
     Compute(const char *, Timers *);
 
     Store store;
+
+    void registerFunction(const char *, MathFunction);
+    void registerFunction(const char *, BoolFunction);
 
     bool evalCondition(JsonVariant);
     bool switchCondition(const char *, JsonVariant);
@@ -72,6 +84,12 @@ private:
     Timers *_timers;
     int _decodeMathOp(const char *);
     int _decodeConditionOp(const char *);
+
+    std::map<const char *, MathFunction, KeyCompare> _mathFunctionMap;
+    std::map<const char *, BoolFunction, KeyCompare> _boolFunctionMap;
+
+    float _execMathFunction(const char *, JsonVariant);
+    bool _execBoolFunction(const char *, JsonVariant);
 };
 
 #endif

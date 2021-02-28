@@ -9,9 +9,19 @@
 #include "../StateMachineDebug.h"
 
 Compute::Compute(const char *deviceId, Timers *timers)
-    : store(deviceId)
+    : store(deviceId), _mathFunctionMap(), _boolFunctionMap()
 {
     _timers = timers;
+}
+
+void Compute::registerFunction(const char *name, MathFunction func)
+{
+    _mathFunctionMap[name] = func;
+}
+
+void Compute::registerFunction(const char *name, BoolFunction func)
+{
+    _boolFunctionMap[name] = func;
 }
 
 void Compute::setVar(const char *varName, float value, bool isLocal)
@@ -166,6 +176,9 @@ bool Compute::switchCondition(const char *operation, JsonVariant operands)
 
         return _timers->validateTimer(timerName, timeout);
     }
+
+    if (_boolFunctionMap.count(operation))
+        return _execBoolFunction(operation, operands);
 
     return false;
 }
@@ -369,6 +382,9 @@ float Compute::evalMath(JsonVariant object)
         }
     }
 
+    if (_mathFunctionMap.count(operation))
+        return _execMathFunction(operation, operands);
+
     return 0.0;
 }
 
@@ -432,4 +448,30 @@ int Compute::_decodeConditionOp(const char *op)
         return C_ELAPSED;
 
     return C_UNKNOWN;
+}
+
+float Compute::_execMathFunction(const char *name, JsonVariant params)
+{
+    ActionContext context(this);
+    JsonArray arr;
+
+    if (!params.isNull() && params.is<JsonArray>()) {
+        arr = params.as<JsonArray>();
+        context.setParams(&arr);
+    }
+
+    return _mathFunctionMap[name](&context);
+}
+
+bool Compute::_execBoolFunction(const char *name, JsonVariant params)
+{
+    ActionContext context(this);
+    JsonArray arr;
+
+    if (!params.isNull() && params.is<JsonArray>()) {
+        arr = params.as<JsonArray>();
+        context.setParams(&arr);
+    }
+
+    return _boolFunctionMap[name](&context);
 }

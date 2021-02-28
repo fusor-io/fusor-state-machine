@@ -22,16 +22,16 @@
 #define DEFINITION_STATE_MACHINES "s" // definitions of all state machines
 #define DEFINITION_SLEEP_TIMEOUT "t"  // time to wait before running next update cycle
 
-#define STATE_ENTRY_ACTIONS "a"       // actions to run when entering state
-#define STATE_EXIT_RULES "r"          // rules to check if any state exit conditions are met
-#define STATE_RULE_IF "i"             // of "if" rule
-#define STATE_RULE_THEN "t"           // "then" part of "if" rule (next state)
-#define STATE_RULE_EXIT_ACTIONS "a"   // exit actions if rule is satisfied (before next state)
+#define STATE_ENTRY_ACTIONS "a"     // actions to run when entering state
+#define STATE_EXIT_RULES "r"        // rules to check if any state exit conditions are met
+#define STATE_RULE_IF "i"           // of "if" rule
+#define STATE_RULE_THEN "t"         // "then" part of "if" rule (next state)
+#define STATE_RULE_EXIT_ACTIONS "a" // exit actions if rule is satisfied (before next state)
 
-#define SM_INITIAL_STATE "i"          // initial state machine state
-#define SM_INITIAL_ACTIONS "a"        // initial actios to run (executed only once)
-#define SM_BEFORE_CYCLE_ACTIONS "b"   // actions to run before each specific state machine cycle
-#define SM_STATES "s"                 // state definitios of state machine
+#define SM_INITIAL_STATE "i"        // initial state machine state
+#define SM_INITIAL_ACTIONS "a"      // initial actios to run (executed only once)
+#define SM_BEFORE_CYCLE_ACTIONS "b" // actions to run before each specific state machine cycle
+#define SM_STATES "s"               // state definitios of state machine
 
 #define ASSIGNMENT_ACTION_ID ":="
 
@@ -158,6 +158,8 @@ public:
   StateMachineController(const char *, SleepFunction, GetTimeFunction);
   void setActionRunner(ActionFunction);
   void registerAction(const char *, ActionFunction);
+  void registerFunction(const char *, MathFunction);
+  void registerFunction(const char *, BoolFunction);
   void registerPlugin(Plugin *);
   void setDefinition(JsonDocument *);
   void setDefinition(JsonVariant);
