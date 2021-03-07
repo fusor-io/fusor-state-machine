@@ -32,11 +32,14 @@ class Compute; // forward ref
 #define M_POW 203
 #define M_DIFF 204
 
-#define M_MULTI 300
-#define M_SUM 301
-#define M_MUL 302
-#define M_MIN 303
-#define M_MAX 304
+#define M_TRINARY 300
+#define M_IF 301
+
+#define M_MULTI 400
+#define M_SUM 401
+#define M_MUL 402
+#define M_MIN 403
+#define M_MAX 404
 
 #define C_UNKNOWN -1
 

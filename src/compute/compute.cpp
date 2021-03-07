@@ -218,7 +218,12 @@ float Compute::evalMath(JsonVariant object)
 
     // it should be the only property, so let's get the first one
 
-    JsonObject::iterator operation_iter = ((JsonObject)object.as<JsonObject>()).begin();
+    JsonObject obj = object.as<JsonObject>();
+    JsonObject::iterator operation_iter = obj.begin();
+
+    // check if object is empty
+    if (!obj.size())
+        return 0.0;
 
     // check if property actually has name
     const char *operation = operation_iter->key().c_str();
@@ -235,7 +240,7 @@ float Compute::evalMath(JsonVariant object)
         case M_TICKS:
             return (float)_timers->getTime();
         default:
-            return 0.0f;
+            return 0.0;
         }
     }
     else if (op > M_UNARY && op < M_BINARY)
@@ -289,7 +294,7 @@ float Compute::evalMath(JsonVariant object)
             return -operand;
         }
     }
-    else if (op > M_BINARY && op < M_MULTI)
+    else if (op > M_BINARY && op < M_TRINARY)
     {
         // binary operations
 
@@ -297,9 +302,7 @@ float Compute::evalMath(JsonVariant object)
 
         if (!operands.is<JsonArray>())
         {
-
             // we shouldn't be here, but if we are, just return value
-
             return evalMath(operands);
         }
 
@@ -335,6 +338,35 @@ float Compute::evalMath(JsonVariant object)
             unsigned long a = round(evalMath(operands[0]));
             unsigned long b = round(evalMath(operands[1]));
             return (float)std::min(_timers->diff(a, b), _timers->diff(b, a));
+        }
+    }
+    else if (op > M_TRINARY && op < M_MULTI)
+    {
+        // trinary operations
+
+        // lets do preflight check first
+
+        if (!operands.is<JsonArray>())
+        {
+            // we shouldn't be here, but if we are, just return value
+            return evalMath(operands);
+        }
+
+        JsonArray arr = operands.as<JsonArray>();
+
+        size_t size = arr.size();
+        if (size == 0)
+            return 0.0;
+
+        switch (op)
+        {
+        case M_IF:
+        default:
+            if (size == 1)
+                return 0.0;
+            if (size == 2)
+                return evalCondition(arr[0]) ? evalMath(arr[1]) : 0.0;
+            return evalMath(evalCondition(arr[0]) ? arr[1] : arr[2]);
         }
     }
     else if (op > M_MULTI)
@@ -416,6 +448,8 @@ int Compute::_decodeMathOp(const char *op)
         return M_MIN;
     if (strcasecmp(op, "max") == 0)
         return M_MAX;
+    if (strcasecmp(op, "?") == 0)
+        return M_IF;
     if (strcasecmp(op, "ticks") == 0) // current time in OS units (provided by _getTimeCallback)
         return M_TICKS;
     if (strcasecmp(op, "diff") == 0) // time difference in OS units, for short periods (timer overflow safe)
@@ -455,7 +489,8 @@ float Compute::_execMathFunction(const char *name, JsonVariant params)
     ActionContext context(this);
     JsonArray arr;
 
-    if (!params.isNull() && params.is<JsonArray>()) {
+    if (!params.isNull() && params.is<JsonArray>())
+    {
         arr = params.as<JsonArray>();
         context.setParams(&arr);
     }
@@ -468,7 +503,8 @@ bool Compute::_execBoolFunction(const char *name, JsonVariant params)
     ActionContext context(this);
     JsonArray arr;
 
-    if (!params.isNull() && params.is<JsonArray>()) {
+    if (!params.isNull() && params.is<JsonArray>())
+    {
         arr = params.as<JsonArray>();
         context.setParams(&arr);
     }
