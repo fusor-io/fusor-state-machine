@@ -24,6 +24,11 @@ void Compute::registerFunction(const char *name, BoolFunction func)
     _boolFunctionMap[name] = func;
 }
 
+void Compute::setVar(const char *varName, const VarStruct &value, bool isLocal)
+{
+    store.setVar(varName, value, isLocal);
+}
+
 void Compute::setVar(const char *varName, float value, bool isLocal)
 {
     store.setVar(varName, value, isLocal);
@@ -144,8 +149,8 @@ bool Compute::switchCondition(const char *operation, JsonVariant operands)
 
         if (operands.size() < 2)
             return false;
-        float op1 = evalMath(arr[0]);
-        float op2 = evalMath(arr[1]);
+        VarStruct op1 = evalMath(arr[0]);
+        VarStruct op2 = evalMath(arr[1]);
 
         switch (op)
         {
@@ -172,7 +177,7 @@ bool Compute::switchCondition(const char *operation, JsonVariant operands)
         if (!timerName[0])
             return true;
 
-        unsigned long timeout = round(evalMath(operands[1]));
+        unsigned long timeout = evalMath(operands[1]).vInt;
 
         return _timers->validateTimer(timerName, timeout);
     }
@@ -183,25 +188,26 @@ bool Compute::switchCondition(const char *operation, JsonVariant operands)
     return false;
 }
 
-float Compute::evalMath(JsonVariant object)
+VarStruct Compute::evalMath(JsonVariant object)
 {
 
     SM_DEBUG("Eval math: " << object << "\n");
 
     if (object.isNull())
-        return 0.0;
+        return 0l;
     if (object.is<bool>())
-        return (float)object.as<bool>();
+        return VarStruct((long int)object.as<bool>());
     if (object.is<int>())
-        return (float)object.as<int>();
+        return VarStruct((long int)object.as<int>());
     if (object.is<float>())
-        return object.as<float>();
+        return VarStruct(object.as<float>());
     if (object.is<char *>())
     {
         // if type is string, we should look for variable of that name
         const char *varName = (char *)object.as<char *>();
         SM_DEBUG("Operand " << varName << " is a string. Evaluating it as var\n");
-        return varName[0] ? store.getVarFloat(varName) : 0.0;
+        VarStruct *var = store.getVar(varName);
+        return var == nullptr ? VarStruct(0l) : VarStruct(*var);
     }
     if (object.is<JsonArray>())
     {
@@ -209,12 +215,12 @@ float Compute::evalMath(JsonVariant object)
         // but if we are, just eval first element
         JsonArray arr = object.as<JsonArray>();
         if (arr.size() < 1)
-            return 0.0;
+            return 0l;
         return evalMath(arr[0]);
     }
 
     if (!object.is<JsonObject>())
-        return 0.0; // what was that?
+        return 0l; // what was that?
 
     // it should be the only property, so let's get the first one
 
@@ -223,12 +229,12 @@ float Compute::evalMath(JsonVariant object)
 
     // check if object is empty
     if (!obj.size())
-        return 0.0;
+        return 0l;
 
     // check if property actually has name
     const char *operation = operation_iter->key().c_str();
     if (!operation[0])
-        return 0.0;
+        return 0l;
     JsonVariant operands = operation_iter->value();
 
     int op = _decodeMathOp(operation);
@@ -238,9 +244,9 @@ float Compute::evalMath(JsonVariant object)
         switch (op)
         {
         case M_TICKS:
-            return (float)_timers->getTime();
+            return (long int)_timers->getTime();
         default:
-            return 0.0;
+            return 0l;
         }
     }
     else if (op > M_UNARY && op < M_BINARY)
@@ -248,45 +254,36 @@ float Compute::evalMath(JsonVariant object)
 
         // unary operations
 
-        float operand = evalMath(operands);
+        VarStruct operand = evalMath(operands);
 
         switch (op)
         {
 
         case M_SQRT:
 
-            // not correct, but we dont want throw
-            // TODO: implement error handling
-
-            if (operand < 0.0)
-                return FLT_MIN;
-            return sqrt(operand);
+            if (operand < 0l)
+                return VarStruct::NaN();
+            return (float)sqrt(operand.vFloat);
 
         case M_EXP:
 
-            return exp(operand);
+            return (float)exp(operand.vFloat);
 
         case M_LN:
 
-            // not correct, but we dont want throw
-            // TODO: implement NaN
-
-            if (operand <= 0.0)
-                return FLT_MIN;
-            return log(operand);
+            if (operand <= 0l)
+                return VarStruct::NaN();
+            return (float)log(operand.vFloat);
 
         case M_LOG:
 
-            // not correct, but we dont want throw
-            // TODO: implement error handling
-
-            if (operand <= 0.0)
-                return FLT_MIN;
-            return log10(operand);
+            if (operand <= 0l)
+                return VarStruct::NaN();
+            return (float)log10(operand.vFloat);
 
         case M_ABS:
 
-            return abs(operand);
+            return operand >= 0l ? operand : -operand;
 
         case M_NEG:
         default:
@@ -309,7 +306,7 @@ float Compute::evalMath(JsonVariant object)
         JsonArray arr = operands.as<JsonArray>();
 
         if (arr.size() == 0)
-            return 0.0;
+            return 0l;
         if (arr.size() == 1)
         {
             if (op == M_SUB)
@@ -330,14 +327,14 @@ float Compute::evalMath(JsonVariant object)
 
         case M_POW:
 
-            return pow(evalMath(operands[0]), evalMath(operands[1]));
+            return (float)pow(evalMath(operands[0]).vFloat, evalMath(operands[1]).vFloat);
 
         case M_DIFF:
         default:
 
-            unsigned long a = round(evalMath(operands[0]));
-            unsigned long b = round(evalMath(operands[1]));
-            return (float)std::min(_timers->diff(a, b), _timers->diff(b, a));
+            unsigned long a = (unsigned long)evalMath(operands[0]).vInt;
+            unsigned long b = (unsigned long)evalMath(operands[1]).vInt;
+            return (long int)std::min(_timers->diff(a, b), _timers->diff(b, a));
         }
     }
     else if (op > M_TRINARY && op < M_MULTI)
@@ -356,16 +353,16 @@ float Compute::evalMath(JsonVariant object)
 
         size_t size = arr.size();
         if (size == 0)
-            return 0.0;
+            return 0l;
 
         switch (op)
         {
         case M_IF:
         default:
             if (size == 1)
-                return 0.0;
+                return 0l;
             if (size == 2)
-                return evalCondition(arr[0]) ? evalMath(arr[1]) : 0.0;
+                return evalCondition(arr[0]) ? evalMath(arr[1]) : 0l;
             return evalMath(evalCondition(arr[0]) ? arr[1] : arr[2]);
         }
     }
@@ -376,48 +373,59 @@ float Compute::evalMath(JsonVariant object)
 
         JsonArray arr = operands.as<JsonArray>();
         if (arr.size() == 0)
-            return 0.0;
+            return 0l;
 
-        float res;
+        VarStruct res;
 
         switch (op)
         {
 
         case M_SUM:
 
-            res = 0.0;
+            res = 0l;
             for (JsonVariant operand : arr)
-                res += evalMath(operand);
+                res = res + evalMath(operand);
             return res;
 
         case M_MUL:
 
-            res = 1.0;
+            res = 1l;
             for (JsonVariant operand : arr)
-                res *= evalMath(operand);
+                res = res * evalMath(operand);
             return res;
 
         case M_MIN:
+        {
 
-            res = FLT_MAX;
+            unsigned cnt = 0;
             for (JsonVariant operand : arr)
-                res = std::min(res, evalMath(operand));
+            {
+                VarStruct val = evalMath(operand);
+                if (cnt++ == 0 || res > val)
+                    res = val;
+            }
             return res;
+        }
 
         case M_MAX:
         default:
-
-            res = FLT_MIN;
+        {
+            unsigned cnt = 0;
             for (JsonVariant operand : arr)
-                res = std::max(res, evalMath(operand));
+            {
+                VarStruct val = evalMath(operand);
+                if (cnt++ == 0 || res < val)
+                    res = val;
+            }
             return res;
+        }
         }
     }
 
     if (_mathFunctionMap.count(operation))
         return _execMathFunction(operation, operands);
 
-    return 0.0;
+    return 0l;
 }
 
 int Compute::_decodeMathOp(const char *op)
@@ -484,7 +492,7 @@ int Compute::_decodeConditionOp(const char *op)
     return C_UNKNOWN;
 }
 
-float Compute::_execMathFunction(const char *name, JsonVariant params)
+VarStruct Compute::_execMathFunction(const char *name, JsonVariant params)
 {
     ActionContext context(this);
     JsonArray arr;

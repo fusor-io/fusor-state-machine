@@ -59,7 +59,7 @@ class Compute; // forward ref
 #define C_SYSTEM 1000
 #define C_ELAPSED 1001
 
-typedef float (*MathFunction)(ActionContext *);
+typedef VarStruct (*MathFunction)(ActionContext *);
 typedef bool (*BoolFunction)(ActionContext *);
 
 class Compute
@@ -74,8 +74,9 @@ public:
 
     bool evalCondition(JsonVariant);
     bool switchCondition(const char *, JsonVariant);
-    float evalMath(JsonVariant);
+    VarStruct evalMath(JsonVariant);
 
+    void setVar(const char *, const VarStruct &, bool isLocal = true);
     void setVar(const char *, float, bool isLocal = true);
     void setVar(const char *, long int, bool isLocal = true);
     float getVarFloat(const char *, float defaultValue = 0.0f);
@@ -91,7 +92,7 @@ private:
     std::map<const char *, MathFunction, KeyCompare> _mathFunctionMap;
     std::map<const char *, BoolFunction, KeyCompare> _boolFunctionMap;
 
-    float _execMathFunction(const char *, JsonVariant);
+    VarStruct _execMathFunction(const char *, JsonVariant);
     bool _execBoolFunction(const char *, JsonVariant);
 };
 

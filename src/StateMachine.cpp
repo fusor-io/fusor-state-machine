@@ -72,6 +72,11 @@ void StateMachineController::setHooks(Hooks *hooks)
   compute.setHooks(hooks);
 }
 
+void StateMachineController::setVar(const char *varName, const VarStruct &value, bool isLocal)
+{
+  compute.setVar(varName, value, isLocal);
+}
+
 void StateMachineController::setVar(const char *varName, float value, bool isLocal)
 {
   compute.setVar(varName, value, isLocal);
@@ -131,7 +136,7 @@ void StateMachineController::cycle()
 
   if (_definition.containsKey(DEFINITION_SLEEP_TIMEOUT))
   {
-    timeout = round(compute.evalMath(_definition[DEFINITION_SLEEP_TIMEOUT]));
+    timeout = compute.evalMath(_definition[DEFINITION_SLEEP_TIMEOUT]).vInt;
   }
 
   if (timeout > 0)

@@ -167,6 +167,7 @@ public:
   void cycle();
   void setHooks(Hooks *);
 
+  void setVar(const char *, const VarStruct &, bool isLocal = true);
   void setVar(const char *, float, bool isLocal = true);
   void setVar(const char *, long int, bool isLocal = true);
   float getVarFloat(const char *, float defaultValue = 0.0f);

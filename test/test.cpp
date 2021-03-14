@@ -40,6 +40,22 @@ TEST(StateMachine, NameWithScope)
   ASSERT_STREQ(keyCreator.withScope("testid", "testname"), "testid.testname");
 }
 
+TEST(StateMachine, setVar)
+{
+  StateMachineController sm = StateMachineController("sm", NULL, getTime);
+  sm.compute.store.setVar("test", 42l);
+  ASSERT_EQ(sm.compute.store.getVar("test")->type, VAR_TYPE_LONG);
+  ASSERT_EQ(sm.compute.store.getVar("test")->vInt, 42l);
+
+  sm.compute.store.setVar("test", 137.0f);
+  ASSERT_EQ(sm.compute.store.getVar("test")->type, VAR_TYPE_FLOAT);
+  ASSERT_EQ(sm.compute.store.getVar("test")->vInt, 137l);
+
+  sm.compute.store.setVar("test", VarStruct(7l));
+  ASSERT_EQ(sm.compute.store.getVar("test")->type, VAR_TYPE_LONG);
+  ASSERT_EQ(sm.compute.store.getVar("test")->vFloat, 7.0f);
+}
+
 TEST(StateMachine, setVar_getVarInt)
 {
   StateMachineController sm = StateMachineController("sm", NULL, getTime);
@@ -50,6 +66,176 @@ TEST(StateMachine, setVar_getVarInt)
   ASSERT_EQ(sm.getVarInt("test1"), 137);
   ASSERT_EQ(sm.getVarInt("test2"), 0);
   ASSERT_EQ(sm.getVarInt("test2", 7), 7);
+}
+
+VarStruct var_r(0.0f);
+
+TEST(StateMachine, VarStructAssign)
+{
+  var_r = 42;
+  ASSERT_EQ(var_r.type, VAR_TYPE_LONG);
+  ASSERT_EQ(var_r.vInt, 42l);
+  ASSERT_FLOAT_EQ(var_r.vFloat, 42.0f);
+
+  var_r = 42l;
+  ASSERT_EQ(var_r.type, VAR_TYPE_LONG);
+  ASSERT_EQ(var_r.vInt, 42l);
+  ASSERT_FLOAT_EQ(var_r.vFloat, 42.0f);
+
+  var_r = 42.1f;
+  ASSERT_EQ(var_r.type, VAR_TYPE_FLOAT);
+  ASSERT_EQ(var_r.vInt, 42l);
+  ASSERT_FLOAT_EQ(var_r.vFloat, 42.1f);
+
+  var_r = VarStruct(42l);
+  ASSERT_EQ(var_r.type, VAR_TYPE_LONG);
+  ASSERT_EQ(var_r.vInt, 42l);
+  ASSERT_FLOAT_EQ(var_r.vFloat, 42.0f);
+
+  var_r = VarStruct(42.1f);
+  ASSERT_EQ(var_r.type, VAR_TYPE_FLOAT);
+  ASSERT_EQ(var_r.vInt, 42l);
+  ASSERT_FLOAT_EQ(var_r.vFloat, 42.1f);
+
+  var_r = VarStruct(1.0e+38f);
+  ASSERT_EQ(var_r.type, VAR_TYPE_FLOAT);
+  ASSERT_EQ(var_r.vInt, std::numeric_limits<long>::min()); // overflow
+  ASSERT_FLOAT_EQ(var_r.vFloat, 1.0e+38f);
+
+  var_r = VarStruct(-1.0e+38f);
+  ASSERT_EQ(var_r.type, VAR_TYPE_FLOAT);
+  ASSERT_EQ(var_r.vInt, std::numeric_limits<long>::min()); // overflow
+  ASSERT_FLOAT_EQ(var_r.vFloat, -1.0e+38f);
+}
+
+TEST(StateMachine, VarStructAdd)
+{
+  var_r = VarStruct(42l) + VarStruct(1.0f);
+  ASSERT_EQ(var_r.type, VAR_TYPE_FLOAT);
+  ASSERT_EQ(var_r.vInt, 43l);
+  ASSERT_FLOAT_EQ(var_r.vFloat, 43.0f);
+
+  var_r = VarStruct(42l) + VarStruct(1l);
+  ASSERT_EQ(var_r.type, VAR_TYPE_LONG);
+  ASSERT_EQ(var_r.vInt, 43l);
+  ASSERT_FLOAT_EQ(var_r.vFloat, 43.0f);
+
+  var_r = VarStruct(999999999l) + VarStruct(999999999l);
+  ASSERT_EQ(var_r.type, VAR_TYPE_LONG);
+  ASSERT_EQ(var_r.vInt, 1999999998l);
+  ASSERT_FLOAT_EQ(var_r.vFloat, 2e+9f);
+}
+
+TEST(StateMachine, VarStructSub)
+{
+  var_r = VarStruct(42l) - VarStruct(1.0f);
+  ASSERT_EQ(var_r.type, VAR_TYPE_FLOAT);
+  ASSERT_EQ(var_r.vInt, 41l);
+  ASSERT_FLOAT_EQ(var_r.vFloat, 41.0f);
+
+  var_r = VarStruct(42l) - VarStruct(1l);
+  ASSERT_EQ(var_r.type, VAR_TYPE_LONG);
+  ASSERT_EQ(var_r.vInt, 41l);
+  ASSERT_FLOAT_EQ(var_r.vFloat, 41.0f);
+
+  var_r = VarStruct(1l) - VarStruct(999999999l);
+  ASSERT_EQ(var_r.type, VAR_TYPE_LONG);
+  ASSERT_EQ(var_r.vInt, -999999998l);
+  ASSERT_FLOAT_EQ(var_r.vFloat, -1e9f);
+}
+
+TEST(StateMachine, VarStructMul)
+{
+  var_r = VarStruct(42l) * VarStruct(1.1f) * VarStruct(1.1f);
+  ASSERT_EQ(var_r.type, VAR_TYPE_FLOAT);
+  ASSERT_EQ(var_r.vInt, 51l);
+  ASSERT_FLOAT_EQ(var_r.vFloat, 50.82f);
+
+  var_r = VarStruct(1.0e+37f) * VarStruct(10.0f);
+  ASSERT_EQ(var_r.type, VAR_TYPE_FLOAT);
+  ASSERT_EQ(var_r.vInt, std::numeric_limits<long>::min()); // overflow
+  ASSERT_FLOAT_EQ(var_r.vFloat, 1.0e+38f);
+
+  var_r = VarStruct(42l) * VarStruct(999999999l);
+  ASSERT_EQ(var_r.type, VAR_TYPE_LONG);
+  ASSERT_EQ(var_r.vInt, 41999999958l);
+  ASSERT_FLOAT_EQ(var_r.vFloat, 4.2e+10f);
+}
+
+TEST(StateMachine, VarStructDiv)
+{
+  var_r = VarStruct(999999999l) / VarStruct(7l);
+  ASSERT_EQ(var_r.type, VAR_TYPE_LONG);
+  ASSERT_EQ(var_r.vInt, 142857142l);
+  ASSERT_FLOAT_EQ(var_r.vFloat, 1.4285714e+08f);
+
+  var_r = VarStruct(9.0f) / VarStruct(7l);
+  ASSERT_EQ(var_r.type, VAR_TYPE_FLOAT);
+  ASSERT_EQ(var_r.vInt, 1l);
+  ASSERT_FLOAT_EQ(var_r.vFloat, 1.285714f);
+
+  var_r = VarStruct(42l) / VarStruct(0l);
+  ASSERT_EQ(var_r.type, VAR_TYPE_NAN);
+  var_r = VarStruct(1.0f) / VarStruct(0.0f);
+  ASSERT_EQ(var_r.type, VAR_TYPE_NAN);
+}
+
+TEST(StateMachine, VarStructGt)
+{
+  ASSERT_EQ(VarStruct(1l) > VarStruct(-1l), true);
+  ASSERT_EQ(VarStruct(1l) > VarStruct(2l), false);
+  ASSERT_EQ(VarStruct(1l) > VarStruct(-1.0f), true);
+  ASSERT_EQ(VarStruct(1l) > VarStruct(2.0f), false);
+  ASSERT_EQ(VarStruct(1l) / VarStruct(0l) > VarStruct(-1l), false);
+}
+
+TEST(StateMachine, VarStructGte)
+{
+  ASSERT_EQ(VarStruct(1l) >= VarStruct(-1l), true);
+  ASSERT_EQ(VarStruct(1l) >= VarStruct(1l), true);
+  ASSERT_EQ(VarStruct(1l) >= VarStruct(2l), false);
+  ASSERT_EQ(VarStruct(1l) >= VarStruct(-1.0f), true);
+  ASSERT_EQ(VarStruct(1l) >= VarStruct(-1.0f), true);
+  ASSERT_EQ(VarStruct(1l) >= VarStruct(2.0f), false);
+  ASSERT_EQ(VarStruct(1l) / VarStruct(0l) >= VarStruct(-1l), false);
+}
+
+TEST(StateMachine, VarStructLt)
+{
+  ASSERT_EQ(VarStruct(1l) < VarStruct(-1l), false);
+  ASSERT_EQ(VarStruct(1l) < VarStruct(2l), true);
+  ASSERT_EQ(VarStruct(1l) < VarStruct(-1.0f), false);
+  ASSERT_EQ(VarStruct(1l) < VarStruct(2.0f), true);
+  ASSERT_EQ(VarStruct(1l) / VarStruct(0l) < VarStruct(-1l), false);
+}
+
+TEST(StateMachine, VarStructLte)
+{
+  ASSERT_EQ(VarStruct(1l) <= VarStruct(-1l), false);
+  ASSERT_EQ(VarStruct(1l) <= VarStruct(1l), true);
+  ASSERT_EQ(VarStruct(1l) <= VarStruct(2l), true);
+  ASSERT_EQ(VarStruct(1l) <= VarStruct(-1.0f), false);
+  ASSERT_EQ(VarStruct(1l) <= VarStruct(1.0f), true);
+  ASSERT_EQ(VarStruct(1l) <= VarStruct(2.0f), true);
+  ASSERT_EQ(VarStruct(1l) / VarStruct(0l) <= VarStruct(-1l), false);
+}
+
+TEST(StateMachine, VarStructEq)
+{
+  ASSERT_EQ(VarStruct(1l) == VarStruct(-1l), false);
+  ASSERT_EQ(VarStruct(1l) == VarStruct(1l), true);
+  ASSERT_EQ(VarStruct(1l) == VarStruct(-1.0f), false);
+  ASSERT_EQ(VarStruct(1l) == VarStruct(1.0f), true);
+  ASSERT_EQ(VarStruct(1l) / VarStruct(0l) == VarStruct(1l) / VarStruct(0l), false);
+}
+
+TEST(StateMachine, VarStructNeq)
+{
+  ASSERT_EQ(VarStruct(1l) != VarStruct(-1l), true);
+  ASSERT_EQ(VarStruct(1l) != VarStruct(1l), false);
+  ASSERT_EQ(VarStruct(1l) != VarStruct(-1.0f), true);
+  ASSERT_EQ(VarStruct(1l) != VarStruct(1.0f), false);
+  ASSERT_EQ(VarStruct(1l) / VarStruct(0l) != VarStruct(1l) / VarStruct(0l), false);
 }
 
 TEST(StateMachine, updateVarInt)
@@ -177,79 +363,79 @@ TEST(StateMachine, evalMath)
   StateMachineController sm = StateMachineController("sm", NULL, getTime);
   JsonVariant expression;
 
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"sqrt\":[16]}")), 4.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"sqrt\":[-1]}")), FLT_MIN);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"sqrt\":[16]}")).vFloat, 4.0f);
+  ASSERT_EQ(sm.compute.evalMath(makeVariant("{\"sqrt\":[-1]}")).type, VAR_TYPE_NAN);
 
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"SQRT\":[16]}")), 4.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"Sqrt\":[16]}")), 4.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"sqrt\":\"\"}")), 0.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"sqrt\":[]}")), 0.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"sqrt\":[16,17]}")), 4.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"SQRT\":[16]}")).vFloat, 4.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"Sqrt\":[16]}")).vFloat, 4.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"sqrt\":\"\"}")).vFloat, 0.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"sqrt\":[]}")).vFloat, 0.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"sqrt\":[16,17]}")).vFloat, 4.0f);
 
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"exp\":[1]}")), 2.71828182846f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"exp\":[0]}")), 1.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"exp\":[-1]}")), 0.36787944117f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"exp\":[1]}")).vFloat, 2.71828182846f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"exp\":[0]}")).vFloat, 1.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"exp\":[-1]}")).vFloat, 0.36787944117f);
 
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"ln\":[1]}")), 0.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"ln\":[10]}")), 2.30258509299f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"ln\":[-1]}")), FLT_MIN);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"ln\":[1]}")).vFloat, 0.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"ln\":[10]}")).vFloat, 2.30258509299f);
+  ASSERT_EQ(sm.compute.evalMath(makeVariant("{\"ln\":[-1]}")).type, VAR_TYPE_NAN);
 
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"log\":[1]}")), 0.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"log\":[10]}")), 1.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"log\":[-1]}")), FLT_MIN);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"log\":[1]}")).vFloat, 0.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"log\":[10]}")).vFloat, 1.0f);
+  ASSERT_EQ(sm.compute.evalMath(makeVariant("{\"log\":[-1]}")).type, VAR_TYPE_NAN);
 
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"abs\":[1]}")), 1.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"abs\":[-1]}")), 1.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"abs\":[0]}")), 0.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"abs\":[1]}")).vFloat, 1.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"abs\":[-1]}")).vFloat, 1.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"abs\":[0]}")).vFloat, 0.0f);
 
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"neg\":[1]}")), -1.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"neg\":[-1]}")), 1.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"neg\":[0]}")), 0.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"neg\":[1]}")).vFloat, -1.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"neg\":[-1]}")).vFloat, 1.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"neg\":[0]}")).vFloat, 0.0f);
 
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"sub\":[43,1]}")), 42.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"sub\":[43,1]}")).vFloat, 42.0f);
 
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"div\":[84,2]}")), 42.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"div\":[84,2]}")).vFloat, 42.0f);
 
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"pow\":[2,10]}")), 1024.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"pow\":[2,10]}")).vFloat, 1024.0f);
 
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"sum\":[42]}")), 42.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"sum\":[3.0, 0.14]}")), 3.14f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"sum\":[4.0, -1.0, 0.1, 0.04]}")), 3.14f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"sum\":[42]}")).vFloat, 42.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"sum\":[3.0, 0.14]}")).vFloat, 3.14f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"sum\":[4.0, -1.0, 0.1, 0.04]}")).vFloat, 3.14f);
 
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"mul\":[42]}")), 42.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"mul\":[2,21]}")), 42.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"mul\":[2,3,7]}")), 42.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"mul\":[42]}")).vFloat, 42.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"mul\":[2,21]}")).vFloat, 42.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"mul\":[2,3,7]}")).vFloat, 42.0f);
 
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"min\":[42]}")), 42.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"min\":[42,43]}")), 42.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"min\":[43,42,44]}")), 42.0f);
+  ASSERT_EQ(sm.compute.evalMath(makeVariant("{\"min\":[42]}")).vInt, 42);
+  ASSERT_EQ(sm.compute.evalMath(makeVariant("{\"min\":[42,43]}")).vInt, 42);
+  ASSERT_EQ(sm.compute.evalMath(makeVariant("{\"min\":[43,42,44]}")).vInt, 42);
 
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"max\":[42]}")), 42.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"max\":[41,42]}")), 42.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"max\":[40,42,41]}")), 42.0f);
+  ASSERT_EQ(sm.compute.evalMath(makeVariant("{\"max\":[42]}")).vInt, 42);
+  ASSERT_EQ(sm.compute.evalMath(makeVariant("{\"max\":[41,42]}")).vInt, 42);
+  ASSERT_EQ(sm.compute.evalMath(makeVariant("{\"max\":[40,42,41]}")).vInt, 42);
 
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"sum\":[{\"sqrt\":[64]},{\"mul\":[2,17]}]}")), 42.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"sum\":[{\"sqrt\":[64]},{\"mul\":[2,17]}]}")).vFloat, 42.0f);
 
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"?\":[true, 42, 137]}")), 42.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"?\":[false, 42, 137]}")), 137.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"?\":[true, 42]}")), 42.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"?\":[false, 42]}")), 0.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"?\":42}")), 42.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"?\":{}}")), 0.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"?\":[]}")), 0.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"?\":[true, 42, 137]}")).vFloat, 42.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"?\":[false, 42, 137]}")).vFloat, 137.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"?\":[true, 42]}")).vFloat, 42.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"?\":[false, 42]}")).vFloat, 0.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"?\":42}")).vFloat, 42.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"?\":{}}")).vFloat, 0.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"?\":[]}")).vFloat, 0.0f);
 
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"diff\":[10,20]}")), 10.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"diff\":[20,10]}")), 10.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"diff\":[-10,10]}")), 20.0f);
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"diff\":[10,-10]}")), 20.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"diff\":[10,20]}")).vFloat, 10.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"diff\":[20,10]}")).vFloat, 10.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"diff\":[-10,10]}")).vFloat, 20.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"diff\":[10,-10]}")).vFloat, 20.0f);
 
   _time = 137;
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"ticks\":[]}")), 137.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"ticks\":[]}")).vFloat, 137.0f);
 }
 
-float customMath(ActionContext *context)
+VarStruct customMath(ActionContext *context)
 {
-  return (context->getParamFloat(0) + context->getParamFloat(1)) / context->getParamFloat(2);
+  return (context->getParam(0, 0l) + context->getParam(1, 0l)) / context->getParam(2, 1l);
 }
 
 TEST(StateMachine, evalCustomMath)
@@ -257,7 +443,8 @@ TEST(StateMachine, evalCustomMath)
   StateMachineController sm = StateMachineController("sm", NULL, getTime);
   sm.registerFunction("test", customMath);
 
-  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"test\":[7,3,5]}")), 2.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"test\":[7,4,5]}")).vFloat, 2.0f);
+  ASSERT_FLOAT_EQ(sm.compute.evalMath(makeVariant("{\"test\":[7,4,5.0]}")).vFloat, 2.2f);
 }
 
 bool customBool(ActionContext *context)

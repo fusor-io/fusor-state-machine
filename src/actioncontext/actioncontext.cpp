@@ -12,10 +12,20 @@ size_t ActionContext::getCount()
 
 long int ActionContext::getParamInt(size_t paramPosition, long int defaultValue)
 {
-    return getCount() > paramPosition ? round(compute->evalMath(_params->getElement(paramPosition))) : defaultValue;
+    return getCount() > paramPosition ? compute->evalMath(_params->getElement(paramPosition)).vInt : defaultValue;
 }
 
 float ActionContext::getParamFloat(size_t paramPosition, float defaultValue)
+{
+    return getCount() > paramPosition ? compute->evalMath(_params->getElement(paramPosition)).vFloat : defaultValue;
+}
+
+VarStruct ActionContext::getParam(size_t paramPosition, long int defaultValue)
+{
+    return getCount() > paramPosition ? compute->evalMath(_params->getElement(paramPosition)) : defaultValue;
+}
+
+VarStruct ActionContext::getParam(size_t paramPosition, float defaultValue)
 {
     return getCount() > paramPosition ? compute->evalMath(_params->getElement(paramPosition)) : defaultValue;
 }

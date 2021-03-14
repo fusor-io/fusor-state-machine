@@ -14,6 +14,8 @@ public:
     size_t getCount();
     long int getParamInt(size_t, long int defaultValue = 0);
     float getParamFloat(size_t, float defaultValue = 0.0f);
+    VarStruct getParam(size_t, long int defaultValue);
+    VarStruct getParam(size_t, float defaultValue);
 
     void setParams(JsonArray *);
     void resetParams();

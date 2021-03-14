@@ -41,9 +41,28 @@ void Store::setVar(const char *varName, long int value, bool isLocal)
     }
 
     if (_hooks)
-    {
         _hooks->onVarUpdate(varName, var);
+}
+
+void Store::setVar(const char *varName, const VarStruct &value, bool isLocal)
+{
+    // for local variables we need to add scope id
+    char *varNameWithScope = isLocal ? _withScope(varName) : (char *)varName;
+    VarStruct *var;
+
+    SM_DEBUG("Set int var [" << varNameWithScope << "]: " << value.vFloat << "\n");
+    if (_localMemory.count(varNameWithScope))
+    {
+        var = _localMemory[varNameWithScope];
+        *var = value;
     }
+    else
+    {
+        _localMemory[(char *)_keyCreator.createKey(varNameWithScope)] = new VarStruct(value);
+    }
+
+    if (_hooks)
+        _hooks->onVarUpdate(varName, var);
 }
 
 void Store::setVar(const char *var_name, int value, bool isLocal)
@@ -70,9 +89,7 @@ void Store::setVar(const char *varName, float value, bool isLocal)
     }
 
     if (_hooks)
-    {
         _hooks->onVarUpdate(varName, var);
-    }
 }
 
 long int Store::getVarInt(const char *name, int defaultValue)
@@ -97,6 +114,9 @@ float Store::getVarFloat(const char *name, float defaultValue)
 
 VarStruct *Store::getVar(const char *varName)
 {
+    if (varName == nullptr || !varName[0])
+        return nullptr;
+
     // first check in local variables
     SM_DEBUG("Get var: " << varName << "\n");
 
@@ -167,7 +187,6 @@ VarStruct *Store::updateVar(VarStruct *var, const char *varName, float value, bo
 
         return variable;
     };
-
 
     if (onlyOnValueChange && variable->vFloat == value)
         return variable;
